@@ -1,16 +1,18 @@
-import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
 import PathReqPage from './pages/setup/PathReqPage.tsx'
+import ModManager from './pages/main/ModManager.tsx'
 import './index.css'
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <PathReqPage />
-  </React.StrictMode>,
+  <Router>
+    <Routes>
+      <Route path="/" element={<PathReqPage />} /> {/* Front page for requesting paths */}
+      <Route path="/mod-manager" element={<ModManager />} /> {/* The current page */}
+    </Routes>
+  </Router>
 )
 
-// Use contextBridge
 window.ipcRenderer.on('main-process-message', (_event, message) => {
   console.log(message)
 })

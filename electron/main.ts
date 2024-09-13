@@ -3,10 +3,20 @@ import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { checkAllLaunchers } from './modules/paths/pathChecks'
-import { promises } from 'original-fs'
+import { join } from 'path'
+import fs from 'fs';
+import { ensureDir } from 'fs-extra'
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+const appDataDir = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share");
+const persistentDataDir = join(appDataDir, 'Tyranny Mod Manager', 'persistent-data');
+const cachedPathsFile = join(persistentDataDir, 'paths.json');
+
+let execFile;
+
+ensureDir(persistentDataDir);
 
 process.env.APP_ROOT = path.join(__dirname, '..')
 
@@ -78,4 +88,41 @@ ipcMain.handle('open-exe-dialog', async (event): Promise<string | null> => {
 
 ipcMain.handle('check-default-paths', () : Promise<string | null> => {
     return Promise.resolve(checkAllLaunchers());
+});
+
+ipcMain.handle('cache-exec-path', (_, path) => {
+  let fileContent = "";
+  if (fs.existsSync(cachedPathsFile))
+    fileContent = fs.readFileSync(cachedPathsFile, 'utf-8');
+
+  let cachedPaths;
+  if (fileContent)
+    cachedPaths = JSON.parse(fileContent) as CachedPaths;
+  else {
+    cachedPaths = {
+      execPath: path
+    } as CachedPaths
+  }
+  
+  cachedPaths.execPath = path;
+  const jsonStr = JSON.stringify(cachedPaths, null, 2);
+
+  fs.writeFileSync(cachedPathsFile, jsonStr);
+  execFile = path;
+});
+
+ipcMain.handle('check-cached-path', async (): Promise<string | null> => {
+  if (!fs.existsSync(cachedPathsFile))
+    return Promise.resolve(null)
+
+  const content = fs.readFileSync(cachedPathsFile, 'utf-8');
+  const json = JSON.parse(content) as CachedPaths;
+  const execPath = json.execPath || null;
+
+  if (!execPath) {
+    return Promise.resolve(null);
+  }
+
+  execFile = execPath;  
+  return Promise.resolve(execPath);
 });

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import '../../style/Global.css'
 import '../../style/setup/Setup.css'
+import { useNavigate } from 'react-router-dom';
 
 function App() {
     const [selectedPath, setSelectedPath] = useState('');
@@ -11,14 +12,29 @@ function App() {
             setSelectedPath(path);
     };
 
+    const navigate = useNavigate();
     const handleContinueClick = async () => {
         const path = document.querySelector('input')?.value;
-        
+
+        if (path) {
+            window.ipcRenderer.cacheExecPath(path);
+            navigate('/mod-manager');
+        }
     }
 
     useEffect(() => {
         const checkPathOnStartup = async () => {
-            const path = await window.ipcRenderer.checkDefaultPaths();
+            let path = await window.ipcRenderer.checkCachedPath();
+
+            console.log(path);
+
+            if (path) {
+                navigate('/app');
+                return;
+            }
+
+            if (!path)
+                path = await window.ipcRenderer.checkDefaultPaths();
 
             if (path) {
                 setSelectedPath(path);

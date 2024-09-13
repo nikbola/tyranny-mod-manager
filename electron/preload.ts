@@ -20,8 +20,13 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   openExeDialog() {
     return ipcRenderer.invoke('open-exe-dialog');
   },
-
   checkDefaultPaths: () => {
     return ipcRenderer.invoke('check-default-paths');
   },
+  checkCachedPath: () => {
+    return ipcRenderer.invoke('check-cached-path');
+  },
+  cacheExecPath: (path: string) => {
+    ipcRenderer.invoke('cache-exec-path', path);
+  }
 })

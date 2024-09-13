@@ -24,8 +24,10 @@ declare namespace NodeJS {
 // Used in Renderer process, expose in `preload.ts`
 interface Window {
   ipcRenderer: {
+    cacheExecPath: (path: string) => void;
     openExeDialog: () => Promise<string | null>;
     checkDefaultPaths: () => Promise<string | null>;
+    checkCachedPath: () => Promise<string | null>;
     on: (...args: Parameters<import('electron').IpcRenderer['on']>) => void;
     off: (...args: Parameters<import('electron').IpcRenderer['off']>) => void;
     send: (...args: Parameters<import('electron').IpcRenderer['send']>) => void;

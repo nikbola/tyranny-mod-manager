@@ -22,5 +22,11 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   },
   checkDefaultPaths: () => {
     return electron.ipcRenderer.invoke("check-default-paths");
+  },
+  checkCachedPath: () => {
+    return electron.ipcRenderer.invoke("check-cached-path");
+  },
+  cacheExecPath: (path) => {
+    electron.ipcRenderer.invoke("cache-exec-path", path);
   }
 });

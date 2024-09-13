@@ -29,7 +29,7 @@ function App() {
             console.log(path);
 
             if (path) {
-                navigate('/app');
+                navigate('/mod-manager');
                 return;
             }
 

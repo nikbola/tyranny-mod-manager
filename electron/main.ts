@@ -14,7 +14,9 @@ const appDataDir = process.env.APPDATA || (process.platform == 'darwin' ? proces
 const persistentDataDir = join(appDataDir, 'Tyranny Mod Manager', 'persistent-data');
 const cachedPathsFile = join(persistentDataDir, 'paths.json');
 
-let execFile;
+let execFile: string;
+let gameDir: string;
+let pluginsDir: string;
 
 ensureDir(persistentDataDir);
 
@@ -109,6 +111,8 @@ ipcMain.handle('cache-exec-path', (_, path) => {
 
   fs.writeFileSync(cachedPathsFile, jsonStr);
   execFile = path;
+  gameDir = path.dirname(execFile);
+  pluginsDir = join(gameDir, 'BepInEx', 'plugins');
 });
 
 ipcMain.handle('check-cached-path', async (): Promise<string | null> => {
@@ -123,6 +127,18 @@ ipcMain.handle('check-cached-path', async (): Promise<string | null> => {
     return Promise.resolve(null);
   }
 
-  execFile = execPath;  
+  execFile = execPath;
+  gameDir = path.dirname(execFile);
+  pluginsDir = join(gameDir, 'BepInEx', 'plugins');
   return Promise.resolve(execPath);
+});
+
+ipcMain.handle('install-mod', async (_, file) => {
+  console.log(path);
+  if (!fs.existsSync(file))
+    return;
+  
+  const fileName = path.basename(file);
+  const targetPath = join(pluginsDir, fileName);
+  fs.copyFileSync(file, targetPath);
 });

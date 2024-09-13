@@ -1978,6 +1978,9 @@ const __dirname = path$c.dirname(fileURLToPath(import.meta.url));
 const appDataDir = process.env.APPDATA || (process.platform == "darwin" ? process.env.HOME + "/Library/Preferences" : process.env.HOME + "/.local/share");
 const persistentDataDir = join(appDataDir, "Tyranny Mod Manager", "persistent-data");
 const cachedPathsFile = join(persistentDataDir, "paths.json");
+let execFile;
+let gameDir;
+let pluginsDir;
 lib.ensureDir(persistentDataDir);
 process.env.APP_ROOT = path$c.join(__dirname, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -2051,6 +2054,9 @@ ipcMain.handle("cache-exec-path", (_, path2) => {
   cachedPaths.execPath = path2;
   const jsonStr = JSON.stringify(cachedPaths, null, 2);
   fs$i.writeFileSync(cachedPathsFile, jsonStr);
+  execFile = path2;
+  gameDir = path2.dirname(execFile);
+  pluginsDir = join(gameDir, "BepInEx", "plugins");
 });
 ipcMain.handle("check-cached-path", async () => {
   if (!fs$i.existsSync(cachedPathsFile))
@@ -2061,7 +2067,18 @@ ipcMain.handle("check-cached-path", async () => {
   if (!execPath) {
     return Promise.resolve(null);
   }
+  execFile = execPath;
+  gameDir = path$c.dirname(execFile);
+  pluginsDir = join(gameDir, "BepInEx", "plugins");
   return Promise.resolve(execPath);
+});
+ipcMain.handle("install-mod", async (_, file2) => {
+  console.log(path$c);
+  if (!fs$i.existsSync(file2))
+    return;
+  const fileName = path$c.basename(file2);
+  const targetPath = join(pluginsDir, fileName);
+  fs$i.copyFileSync(file2, targetPath);
 });
 export {
   MAIN_DIST,

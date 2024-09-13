@@ -28,5 +28,8 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   },
   cacheExecPath: (path) => {
     electron.ipcRenderer.invoke("cache-exec-path", path);
+  },
+  installMod: (path) => {
+    electron.ipcRenderer.invoke("install-mod", path);
   }
 });

@@ -28,5 +28,8 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   },
   cacheExecPath: (path: string) => {
     ipcRenderer.invoke('cache-exec-path', path);
+  },
+  installMod: (path: string) => {
+    ipcRenderer.invoke('install-mod', path);
   }
 })

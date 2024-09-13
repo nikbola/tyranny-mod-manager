@@ -28,6 +28,7 @@ interface Window {
     openExeDialog: () => Promise<string | null>;
     checkDefaultPaths: () => Promise<string | null>;
     checkCachedPath: () => Promise<string | null>;
+    installMod: (path: string) => void;
     on: (...args: Parameters<import('electron').IpcRenderer['on']>) => void;
     off: (...args: Parameters<import('electron').IpcRenderer['off']>) => void;
     send: (...args: Parameters<import('electron').IpcRenderer['send']>) => void;

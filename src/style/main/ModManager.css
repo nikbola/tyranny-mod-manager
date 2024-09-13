@@ -1,0 +1,50 @@
+.mod-list-header {
+    margin-bottom: 30px;
+}
+
+.mod-list {
+    padding: 20px;
+    text-align: center;
+    width: 30vw;
+    position: absolute;
+    left: 20px;
+    height: calc(100vh - 80px);
+    top: 20px;
+    border-radius: 10px;
+}
+
+.mod-list .mod-entry:nth-child(even) {
+    background-color: #1e1e1e;
+}
+
+.mod-list {
+    padding: 20px;
+    text-align: center;
+    width: 30vw;
+    position: absolute;
+    left: 20px;
+    height: calc(100vh - 80px);
+    top: 20px;
+}
+
+.mod-list .mod-entry:nth-child(even) {
+    background-color: #1e1e1e;
+}
+
+.mod-entry {
+    height: 60px;
+    width: 100%;
+    border-radius: 5px;
+    text-align: left;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    color: white;
+}
+
+.mod-entry input {
+    width: 18px;
+    height: 18px;
+    margin-right: 20px;
+    margin-left: 20px;
+}

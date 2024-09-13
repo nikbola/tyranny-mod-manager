@@ -1,0 +1,50 @@
+#root {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+}
+
+body {
+    background-color: var(--background-primary);
+}
+
+.path-input {
+    padding: 2em;
+}
+
+.path-display {
+    color: #888;
+}
+
+input {
+    height: 42px;
+    width: 600px;
+    border-radius: 7px;
+    outline: none;
+    border: none;
+    padding-left: 10px;
+}
+
+.browse-button {
+    margin-left: 20px;
+    
+    transition: scale 0.25s ease-out, outline 0.25s ease-out;
+}
+
+.browse-button:hover {
+    outline: var(--purple-primary);
+    scale: 1.1;
+}
+
+.continue-button {
+    width: 200px;
+    margin-top: 50px;
+    background-image: linear-gradient(to top right, var(--purple-primary), var(--purple-secondary));
+
+    transition: scale 0.25s ease-out;
+}
+
+.continue-button:hover {
+    scale: 1.1;
+}

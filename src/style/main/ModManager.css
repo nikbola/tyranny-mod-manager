@@ -6,6 +6,7 @@
     padding: 20px;
     text-align: center;
     width: 30vw;
+    min-width: 600px;
     position: absolute;
     left: 20px;
     height: calc(100vh - 80px);

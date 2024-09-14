@@ -30,6 +30,12 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
     ipcRenderer.invoke('cache-exec-path', path);
   },
   installMod: (path: string) => {
-    ipcRenderer.invoke('install-mod', path);
+    return ipcRenderer.invoke('install-mod', path);
+  },
+  updateModStatus: (id: number, modName: string, enabled: boolean) => {
+    ipcRenderer.invoke('update-mod-status', id, modName, enabled);
+  },
+  getManagedMods: () => {
+    return ipcRenderer.invoke('get-managed-mods');
   }
 })

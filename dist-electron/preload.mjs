@@ -30,6 +30,12 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
     electron.ipcRenderer.invoke("cache-exec-path", path);
   },
   installMod: (path) => {
-    electron.ipcRenderer.invoke("install-mod", path);
+    return electron.ipcRenderer.invoke("install-mod", path);
+  },
+  updateModStatus: (id, modName, enabled) => {
+    electron.ipcRenderer.invoke("update-mod-status", id, modName, enabled);
+  },
+  getManagedMods: () => {
+    return electron.ipcRenderer.invoke("get-managed-mods");
   }
 });

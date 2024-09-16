@@ -37,5 +37,11 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   },
   getManagedMods: () => {
     return electron.ipcRenderer.invoke("get-managed-mods");
+  },
+  isCoreInstalled: () => {
+    return electron.ipcRenderer.invoke("is-core-installed");
+  },
+  isBepInExInstalled: () => {
+    return electron.ipcRenderer.invoke("is-bep-in-ex-installed");
   }
 });

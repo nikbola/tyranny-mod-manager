@@ -37,5 +37,11 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   },
   getManagedMods: () => {
     return ipcRenderer.invoke('get-managed-mods');
+  },
+  isCoreInstalled: () => {
+    return ipcRenderer.invoke('is-core-installed');
+  },
+  isBepInExInstalled: () => {
+    return ipcRenderer.invoke('is-bep-in-ex-installed');
   }
 })

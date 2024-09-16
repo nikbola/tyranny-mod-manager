@@ -29,6 +29,8 @@ interface Window {
     checkDefaultPaths: () => Promise<string | null>;
     checkCachedPath: () => Promise<string | null>;
     getManagedMods: () => Promise<ModList | null>;
+    isCoreInstalled: () => Promise<bool>;
+    isBepInExInstalled: () => Promise<bool>;
     updateModStatus: (id: number, modName: string, enabled: boolean) => void;
     installMod: (path: string) => Promise<{ id: number, modName: string } | null>;
     on: (...args: Parameters<import('electron').IpcRenderer['on']>) => void;

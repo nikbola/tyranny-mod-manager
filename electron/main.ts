@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { checkAllLaunchers } from './modules/paths/pathChecks'
@@ -7,6 +7,8 @@ import fs from 'fs';
 import { createFileSync, ensureDir, moveSync } from 'fs-extra'
 import AdmZip from 'adm-zip';
 import net from 'net';
+import { downloadReleaseFile } from './setup/dependencyDownloadHandler'
+
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -33,6 +35,8 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 
 
 let win: BrowserWindow | null
 
+let tcpClient: net.Socket;
+
 function createWindow() {
   win = new BrowserWindow({
     minWidth: 800,
@@ -48,6 +52,7 @@ function createWindow() {
 
     ipcMain.on('renderer-ready', () => {
       const client = new net.Socket();
+      tcpClient = client;
       client.connect(8181, '127.0.0.1', () => {
         console.log('Connected to .NET TCP server');
         client.write('Hello from Electron');
@@ -146,6 +151,9 @@ ipcMain.handle('cache-exec-path', (_, execPath) => {
   execFile = execPath;
   gameDir = path.dirname(execFile);
   pluginsDir = join(gameDir, 'BepInEx', 'plugins');
+  if (fs.existsSync(pluginsDir)) {
+    ensureDir(pluginsDir);
+  }
 });
 
 ipcMain.handle('check-cached-path', async (): Promise<string | null> => {
@@ -163,6 +171,9 @@ ipcMain.handle('check-cached-path', async (): Promise<string | null> => {
   execFile = execPath;
   gameDir = path.dirname(execFile);
   pluginsDir = join(gameDir, 'BepInEx', 'plugins');
+  if (fs.existsSync(pluginsDir)) {
+    ensureDir(pluginsDir);
+  }
   return Promise.resolve(execPath);
 });
 
@@ -279,3 +290,43 @@ ipcMain.handle('get-managed-mods', (): Promise<ModList> => {
 
   return Promise.resolve(modInfo);
 });
+
+ipcMain.on('download-tmm-core', async () => {
+  if (!fs.existsSync(pluginsDir))
+    await ensureDir(pluginsDir);
+  
+  if (win)
+    await downloadReleaseFile(path.join(pluginsDir, 'TMMCore.zip'), pluginsDir, win);
+
+  win?.webContents.send('tmm-core-downloaded');
+});
+
+ipcMain.handle('is-core-installed', (): Promise<boolean> => {
+  const coreModPath = path.join(pluginsDir, 'TMMCore', 'TMMCore.dll');
+  if (fs.existsSync(coreModPath)) {
+    return Promise.resolve(true);
+  }
+
+  return Promise.resolve(false);
+});
+
+ipcMain.handle('is-bep-in-ex-installed', (): Promise<boolean> => {
+  const bepInExPath = path.join(gameDir, 'BepInEx', 'core', 'BepInEx.dll');
+  if (fs.existsSync(bepInExPath)) {
+    return Promise.resolve(true);
+  }
+
+  return Promise.resolve(false);
+});
+
+ipcMain.on('open-bep-in-ex', () => {
+  shell.openExternal("https://www.nexusmods.com/tyranny/mods/42?tab=description");
+});
+
+ipcMain.on('open-tyranny-folder', () => {
+  shell.openPath(gameDir);
+})
+
+ipcMain.on('setting-changed', (_: any, payload: string) => {
+  tcpClient.write(payload);
+})

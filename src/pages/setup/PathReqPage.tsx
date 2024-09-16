@@ -18,7 +18,7 @@ function App() {
 
         if (path) {
             window.ipcRenderer.cacheExecPath(path);
-            navigate('/mod-manager');
+            navigate('/bep-in-ex-dependencies');
         }
     }
 
@@ -29,7 +29,7 @@ function App() {
             console.log(path);
 
             if (path) {
-                navigate('/mod-manager');
+                navigate('/bep-in-ex-dependencies');
                 return;
             }
 
@@ -46,7 +46,7 @@ function App() {
 
     return (
         <>
-            <h1>Please select the path to Tyranny.exe</h1>
+            <h1>Please select the path to <span className="gradient-text">Tyranny.exe</span></h1>
             <div className="path-input">
                 
                 <input disabled type="text" value={selectedPath} placeholder='Path to Tyranny.exe'/>

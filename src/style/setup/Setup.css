@@ -5,6 +5,12 @@
     text-align: center;
 }
 
+.gradient-text {
+    background: linear-gradient(90deg, #ff7e5f, #feb47b); /* Define your gradient colors */
+    -webkit-background-clip: text; /* Clip background to text */
+    -webkit-text-fill-color: transparent;
+}
+
 .path-input {
     padding: 2em;
 }
@@ -34,13 +40,58 @@ input {
 }
 
 .continue-button {
+    background-image: linear-gradient(to top right, var(--purple-primary), var(--purple-secondary));
+}
+
+.cancel-button {
+    background-color: var(--background-secondary);
+}
+
+.continue-button, .cancel-button {
     width: 200px;
     margin-top: 50px;
-    background-image: linear-gradient(to top right, var(--purple-primary), var(--purple-secondary));
 
     transition: scale 0.25s ease-out;
 }
 
-.continue-button:hover {
+.continue-button:hover, .cancel-button:hover {
     scale: 1.1;
+}
+
+.button-options {
+    justify-content: space-between;
+    display: flex;
+    padding-left: 200px;
+    padding-right: 200px;
+}
+
+.button-option p {
+    opacity: 0;
+
+    transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+}
+
+.button-option:hover p {
+    opacity: 1;
+    transform: translateY(-5%);
+}
+
+.progress-bar-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 10px;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #6a1b9a; /* You can customize this to match your theme */
+    width: 0%; /* Will be updated dynamically based on progress */
+    transition: width 0.25s ease-in-out; /* Smooth transition */
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: #ff7e5f; /* This color can also be customized */
 }

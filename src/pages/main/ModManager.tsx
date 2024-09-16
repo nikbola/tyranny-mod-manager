@@ -54,27 +54,56 @@ const ModManager = () => {
         { id: "345345", label: "Cool Toggle", modName: "Super Mod", actionType: 2 },
     ]);
 
+    function onSlider(event: React.ChangeEvent<HTMLInputElement>) {
+        const payload = {
+            value: event.target.value,
+            id: event.target.id,
+            type: "slider"
+        };
+        const jsonPayload = JSON.stringify(payload);
+        window.ipcRenderer.send('setting-changed', jsonPayload);
+    }
+
+    function onButton(event: React.MouseEvent<HTMLButtonElement>) {
+        const payload = {
+            id: event.currentTarget.id,
+            type: "button"
+        };
+        const jsonPayload = JSON.stringify(payload);
+        window.ipcRenderer.send('setting-changed', jsonPayload);
+    }
+
+    function onToggle(event: React.ChangeEvent<HTMLInputElement>) {
+        const payload = {
+            value: event.target.value,
+            id: event.target.id,
+            type: "toggle"
+        };
+        const jsonPayload = JSON.stringify(payload);
+        window.ipcRenderer.send('setting-changed', jsonPayload);
+    }
+
     const renderActionType = (actionType: number, label: string, action: ModActionPayload) => {
         switch (actionType) {
             case 0:
                 return (
                     <div>
                         <label>{label}</label>
-                        <input className='setting-slider' type="range" min={action.min} max={action.max} />
+                        <input id={action.id} className='setting-slider' type="range" min={action.min} max={action.max} onChange={onSlider}/>
                     </div>
                 );
             case 1:
                 return (
                     <div>
                         <label>{label}</label>
-                        <button>{label}</button>
+                        <button id={action.id} onClick={onButton}>{label}</button>
                     </div>
                 );
             case 2:
                 return (
                     <div>
                         <label>{label}</label>
-                        <input className='setting-toggle' type="checkbox" />
+                        <input id={action.id} onChange={onToggle} className='setting-toggle' type="checkbox" />
                     </div>
                 );
             default:

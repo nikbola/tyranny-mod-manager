@@ -25,6 +25,10 @@ const ModManager = () => {
 
         };
 
+        window.ipcRenderer.on('register-mod-action', (_, message: ModActionPayload) => {
+            setSettings(prevSettings => [...prevSettings, message]);
+        });
+        window.ipcRenderer.send('renderer-ready');
         fetchMods();
     }, []);
 
@@ -43,6 +47,57 @@ const ModManager = () => {
     const [entries, setEntry] = useState<Entry[]>([
         //{ id: 0, modName: "Debug Mod", enabled: true }
     ]);
+
+    const [settings, setSettings] = useState<ModActionPayload[]>([
+        { id: "123123", label: "Test Button", modName: "Bag of Tricks 2.0", actionType: 1 },
+        { id: "234234", label: "Another Slider", modName: "Bag of Tricks 2.0", actionType: 0 },
+        { id: "345345", label: "Cool Toggle", modName: "Super Mod", actionType: 2 },
+    ]);
+
+    const renderActionType = (actionType: number, label: string, action: ModActionPayload) => {
+        switch (actionType) {
+            case 0:
+                return (
+                    <div>
+                        <label>{label}</label>
+                        <input className='setting-slider' type="range" min={action.min} max={action.max} />
+                    </div>
+                );
+            case 1:
+                return (
+                    <div>
+                        <label>{label}</label>
+                        <button>{label}</button>
+                    </div>
+                );
+            case 2:
+                return (
+                    <div>
+                        <label>{label}</label>
+                        <input className='setting-toggle' type="checkbox" />
+                    </div>
+                );
+            default:
+                return null;
+        }
+    };
+
+    const [expandedMods, setExpandedMods] = useState<Record<string, boolean>>({});
+
+    const toggleExpand = (modName: string) => {
+        setExpandedMods((prev) => ({
+            ...prev,
+            [modName]: !prev[modName],
+        }));
+    };
+
+    const groupedSettings = settings.reduce((acc, setting) => {
+        if (!acc[setting.modName]) {
+            acc[setting.modName] = [];
+        }
+        acc[setting.modName].push(setting);
+        return acc;
+    }, {} as Record<string, ModActionPayload[]>);
 
     const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
@@ -75,25 +130,51 @@ const ModManager = () => {
     };
 
     return (
-        <div className='mod-list'
-            onDragOver={handleDragOver}
-            onDragEnter={handleDragEnter}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            style={{
-                border: dragging ? '2px dashed var(--purple-secondary)' : '2px solid var(--purple-primary)',
-            }}
-        >
-            <h3 className='mod-list-header'>Mod List</h3>
+        <>
+            <div className='mod-list'
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                style={{
+                    border: dragging ? '2px dashed var(--purple-secondary)' : '2px solid var(--purple-primary)',
+                }}
+            >
+                <h3 className='mod-list-header'>Mod List</h3>
 
-            {entries.map((entry) => (
-                <div key={entry.id} className='mod-entry'>
-                    <input className='mod-checkbox' type="checkbox" checked={entry.enabled} onChange={(e) => handleModValueChange(entry.id, entry.modName, e.target.checked)} />
-                    <span>{entry.modName}</span>
-                </div>
-            ))}
+                {entries.map((entry) => (
+                    <div key={entry.id} className='mod-entry'>
+                        <input className='mod-checkbox' type="checkbox" checked={entry.enabled} onChange={(e) => handleModValueChange(entry.id, entry.modName, e.target.checked)} />
+                        <span>{entry.modName}</span>
+                    </div>
+                ))}
 
-        </div>
+            </div>
+            <div className='mod-settings-list'
+                style={{
+                    border: dragging ? '2px dashed var(--purple-secondary)' : '2px solid var(--purple-primary)',
+                }}
+            >
+                <h3 className='mod-settings-header'>Mod Settings</h3>
+                {Object.keys(groupedSettings).map((modName) => (
+                    <div key={modName} className="mod-category">
+                        <h2 onClick={() => toggleExpand(modName)} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                            {modName} {expandedMods[modName] ? '-' : '+'}
+                        </h2>
+
+                        {expandedMods[modName] && (
+                            <div className="mod-entries">
+                                {groupedSettings[modName].map((setting) => (
+                                    <div key={setting.id} className="mod-setting">
+                                        {renderActionType(setting.actionType, setting.label, setting)}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+        </>
     );
 };
 

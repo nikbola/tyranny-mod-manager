@@ -1,5 +1,10 @@
 :root {
-    --background-primary: #242424;
-    --purple-primary: #7160e8;
-    --purple-secondary: #8572ff;
+    --background-primary: #121212;
+    --background-secondary: #1e1e1e;
+    --purple-primary: #bb86fc;
+    --purple-secondary: #3700b3;
+}
+
+body {
+    background-color: var(--background-primary);
 }

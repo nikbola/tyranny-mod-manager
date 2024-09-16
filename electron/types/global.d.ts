@@ -10,3 +10,12 @@ interface ModInfo {
     name: string,
     enabled: boolean
 }
+
+interface ModActionPayload {
+    id: string;
+    label: string;
+    modName: string,
+    actionType: number,
+    min?: number,
+    max?: number
+}

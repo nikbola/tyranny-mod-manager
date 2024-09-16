@@ -10,6 +10,7 @@ import require$$4 from "util";
 import require$$5 from "assert";
 import require$$0$2 from "zlib";
 import require$$0$3 from "crypto";
+import net from "net";
 const osType = platform$1();
 const homeDir = homedir();
 const exeName = osType === "win32" ? "Tyranny.exe" : "Tyranny";
@@ -4552,6 +4553,7 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path$c.join(process.env.APP_ROOT
 let win;
 function createWindow() {
   win = new BrowserWindow({
+    minWidth: 800,
     icon: path$c.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
       preload: path$c.join(__dirname, "preload.mjs")
@@ -4560,6 +4562,29 @@ function createWindow() {
   win.webContents.on("did-finish-load", () => {
     win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
     win == null ? void 0 : win.webContents.openDevTools();
+    ipcMain.on("renderer-ready", () => {
+      const client = new net.Socket();
+      client.connect(8181, "127.0.0.1", () => {
+        console.log("Connected to .NET TCP server");
+        client.write("Hello from Electron");
+      });
+      client.on("data", (data) => {
+        const jsonString = data.toString("utf-8");
+        try {
+          const parsedData = JSON.parse(jsonString);
+          console.log(parsedData);
+          win == null ? void 0 : win.webContents.send("register-mod-action", parsedData);
+        } catch (error) {
+          console.error("Failed to parse JSON:", error);
+        }
+      });
+      client.on("close", () => {
+        console.log("Connection closed");
+      });
+      client.on("error", (err) => {
+        console.error("Error occurred:", err);
+      });
+    });
   });
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
@@ -4695,6 +4720,7 @@ ipcMain.handle("install-mod", async (_, file2) => {
   return Promise.resolve(null);
 });
 ipcMain.handle("update-mod-status", (_, id, modName, enabled) => {
+  console.log(id);
   const modPath = enabled ? join(disabledModsDir, modName) : join(pluginsDir, modName);
   const targetPath = enabled ? join(pluginsDir, modName) : join(disabledModsDir, modName);
   lib.moveSync(modPath, targetPath);

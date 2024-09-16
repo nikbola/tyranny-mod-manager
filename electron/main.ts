@@ -6,6 +6,7 @@ import { join } from 'path'
 import fs from 'fs';
 import { createFileSync, ensureDir, moveSync } from 'fs-extra'
 import AdmZip from 'adm-zip';
+import net from 'net';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -34,6 +35,7 @@ let win: BrowserWindow | null
 
 function createWindow() {
   win = new BrowserWindow({
+    minWidth: 800,
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
@@ -43,6 +45,33 @@ function createWindow() {
   win.webContents.on('did-finish-load', () => {
     win?.webContents.send('main-process-message', (new Date).toLocaleString())
     win?.webContents.openDevTools();
+
+    ipcMain.on('renderer-ready', () => {
+      const client = new net.Socket();
+      client.connect(8181, '127.0.0.1', () => {
+        console.log('Connected to .NET TCP server');
+        client.write('Hello from Electron');
+      });
+    
+      client.on('data', (data) => {
+        const jsonString = data.toString('utf-8');
+        try {
+          const parsedData = JSON.parse(jsonString) as ModActionPayload;
+          console.log(parsedData);
+          win?.webContents.send('register-mod-action', parsedData);
+        } catch (error) {
+          console.error('Failed to parse JSON:', error);
+        }
+      });
+    
+      client.on('close', () => {
+        console.log('Connection closed');
+      });
+    
+      client.on('error', (err) => {
+        console.error('Error occurred:', err);
+      });
+    });
   })
 
   if (VITE_DEV_SERVER_URL) {
@@ -214,6 +243,7 @@ ipcMain.handle('install-mod', async (_, file): Promise<{ modName: string } | nul
 });
 
 ipcMain.handle('update-mod-status', (_, id, modName, enabled) => {
+  console.log(id);
   const modPath = enabled ? join(disabledModsDir, modName) : join(pluginsDir, modName);
   const targetPath = enabled ? join(pluginsDir, modName) : join(disabledModsDir, modName);
   moveSync(modPath, targetPath);

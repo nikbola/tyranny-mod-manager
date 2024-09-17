@@ -3,8 +3,23 @@
     --background-secondary: #1e1e1e;
     --purple-primary: #ff7e5f;
     --purple-secondary: #feb47b;
+
+    --top-bar-height: 60px;
 }
 
 body {
     background-color: var(--background-primary);
+}
+
+button:hover {
+    outline: none;
+    border: none;
+}
+
+.primary-button {
+    transition: scale 0.25s ease-out;
+}
+
+.primary-button:hover {
+    scale: 1.1;
 }

@@ -28,6 +28,11 @@ const ModManager = () => {
         window.ipcRenderer.on('register-mod-action', (_, message: ModActionPayload) => {
             setSettings(prevSettings => [...prevSettings, message]);
         });
+
+        window.ipcRenderer.on('connection-closed', () => {
+            setSettings([]);
+        });
+
         window.ipcRenderer.send('renderer-ready');
         fetchMods();
     }, []);
@@ -56,9 +61,9 @@ const ModManager = () => {
 
     function onSlider(event: React.ChangeEvent<HTMLInputElement>) {
         const payload = {
-            value: event.target.value,
+            sliderValue: event.target.value,
             id: event.target.id,
-            type: "slider"
+            type: 0
         };
         const jsonPayload = JSON.stringify(payload);
         window.ipcRenderer.send('setting-changed', jsonPayload);
@@ -67,7 +72,7 @@ const ModManager = () => {
     function onButton(event: React.MouseEvent<HTMLButtonElement>) {
         const payload = {
             id: event.currentTarget.id,
-            type: "button"
+            type: 1
         };
         const jsonPayload = JSON.stringify(payload);
         window.ipcRenderer.send('setting-changed', jsonPayload);
@@ -75,9 +80,9 @@ const ModManager = () => {
 
     function onToggle(event: React.ChangeEvent<HTMLInputElement>) {
         const payload = {
-            value: event.target.value,
+            toggleValue: event.target.checked,
             id: event.target.id,
-            type: "toggle"
+            type: 2
         };
         const jsonPayload = JSON.stringify(payload);
         window.ipcRenderer.send('setting-changed', jsonPayload);

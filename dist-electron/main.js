@@ -1,7 +1,7 @@
 import "electron";
 import "node:url";
 import "node:path";
-import { M, R, V } from "./main-DHx_2PKv.js";
+import { M, R, V } from "./main-BQ4-hLY4.js";
 import "path";
 import "fs";
 import "net";

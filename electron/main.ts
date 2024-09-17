@@ -9,7 +9,6 @@ import AdmZip from 'adm-zip';
 import net from 'net';
 import { downloadReleaseFile } from './setup/dependencyDownloadHandler'
 
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const appDataDir = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share");
@@ -51,32 +50,62 @@ function createWindow() {
     win?.webContents.openDevTools();
 
     ipcMain.on('renderer-ready', () => {
-      const client = new net.Socket();
-      tcpClient = client;
-      client.connect(8181, '127.0.0.1', () => {
-        console.log('Connected to .NET TCP server');
-        client.write('Hello from Electron');
-      });
+      let isConnected = false;
+      let reconnectionTimeout: NodeJS.Timeout;
     
-      client.on('data', (data) => {
-        const jsonString = data.toString('utf-8');
-        try {
-          const parsedData = JSON.parse(jsonString) as ModActionPayload;
-          console.log(parsedData);
-          win?.webContents.send('register-mod-action', parsedData);
-        } catch (error) {
-          console.error('Failed to parse JSON:', error);
+      const connectToServer = () => {
+        tcpClient = new net.Socket();
+    
+        tcpClient.on('connect', () => {
+          isConnected = true;
+          console.log('Connected to .NET TCP server');
+        });
+    
+        tcpClient.on('data', (data) => {
+          const jsonString = data.toString('utf-8');
+          try {
+            const parsedData = JSON.parse(jsonString);
+            console.log('Received data from server:', parsedData);
+            win?.webContents.send('register-mod-action', parsedData);
+          } catch (error) {
+            console.error('Failed to parse JSON:', error);
+          }
+        });
+    
+        tcpClient.on('close', (hadError) => {
+          win?.webContents.send('connection-closed');
+          if (isConnected || hadError) {
+            isConnected = false;
+            attemptReconnection();
+          }
+        });
+    
+        tcpClient.on('error', (err) => {
+          console.error('Error occurred:', err.message);
+        });
+    
+        tcpClient.connect(8181, '127.0.0.1');
+      };
+    
+      const attemptReconnection = () => {
+        if (reconnectionTimeout) {
+          clearTimeout(reconnectionTimeout);
         }
-      });
     
-      client.on('close', () => {
-        console.log('Connection closed');
-      });
+        reconnectionTimeout = setTimeout(() => {
+          console.log('Attempting to reconnect to .NET TCP server...');
+          if (!isConnected) {
+            tcpClient.removeAllListeners();
+            tcpClient.destroy();
     
-      client.on('error', (err) => {
-        console.error('Error occurred:', err);
-      });
+            connectToServer();
+          }
+        }, 5000);
+      };
+    
+      connectToServer();
     });
+
   })
 
   if (VITE_DEV_SERVER_URL) {
@@ -294,7 +323,7 @@ ipcMain.handle('get-managed-mods', (): Promise<ModList> => {
 ipcMain.on('download-tmm-core', async () => {
   if (!fs.existsSync(pluginsDir))
     await ensureDir(pluginsDir);
-  
+
   if (win)
     await downloadReleaseFile(path.join(pluginsDir, 'TMMCore.zip'), pluginsDir, win);
 

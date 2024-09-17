@@ -1,3 +1,37 @@
+/*body {
+    background: none;
+}
+
+#root::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    
+    background: url('../../assets/tyranny-cover.png') no-repeat center center/cover;
+    
+    filter: blur(2px);
+    
+    z-index: -2;
+    pointer-events: none;
+}
+
+#root::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    
+    background-color: rgba(0, 0, 0, 0.815);
+    
+    z-index: -1;
+    pointer-events: none;
+}*/
+
 .mod-list-header,
 .mod-settings-header {
     margin-bottom: 30px;
@@ -6,13 +40,12 @@
 .mod-list {
     padding: 20px;
     text-align: center;
-    width: calc(50vw - 120px);
+    width: calc(50vw - 75px);
     min-width: 300px;
     position: absolute;
     left: 20px;
-    height: calc(100vh - 80px);
-    top: 20px;
-    border-radius: 0px;
+    height: calc(100vh - 90px - var(--top-bar-height));
+    top: calc(var(--top-bar-height) + 25px);
     background-color: var(--background-secondary);
 }
 
@@ -44,12 +77,12 @@
 .mod-settings-list {
     padding: 20px;
     text-align: center;
-    width: calc(50vw - 40px);
+    width: calc(50vw - 75px);
     min-width: 300px;
     position: absolute;
     right: 20px;
-    height: calc(100vh - 80px);
-    top: 20px;
+    height: calc(100vh - 90px - var(--top-bar-height));
+    top: calc(var(--top-bar-height) + 25px);
     background-color: var(--background-secondary);
 }
 

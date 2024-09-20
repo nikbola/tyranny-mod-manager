@@ -1,0 +1,163 @@
+.popup-container {
+    position: fixed;
+    top: 100px;
+    right: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 999;
+}
+
+.popup {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    border-radius: 12px;
+    color: white;
+    font-size: 14px;
+    min-width: 300px;
+    max-width: 350px;
+    min-height: 50px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+    animation: fadeInUpScale 0.6s ease-out forwards, fadeOut 0.6s 3.5s ease-in forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.popup::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1), rgba(255,255,255,0));
+    transform: scale(0);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.5s ease;
+}
+
+.popup:hover::before {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.popup svg {
+    width: 25px;
+    height: 25px;
+    margin-left: 10px;
+    flex-shrink: 0;
+    flex-grow: 0;
+    flex-basis: 25px;
+
+    transition: all 0.25s ease-out;
+}
+
+.popup svg:hover {
+    scale: 1.2;
+}
+
+.popup.info {
+    background-color: #404140;
+    color: white;
+}
+.popup.info svg.copy-btn {
+    fill: white;
+}
+
+.popup.success {
+    background-color: #2c4334;
+    color: #75e5b0;
+}
+
+.popup.success svg.copy-btn {
+    fill: #75e5b0;
+}
+
+.popup.warning {
+    background-color: #3f3831;
+    color: #e1ad70;
+}
+
+.popup.warning svg.copy-btn {
+    fill: #e1ad70;
+}
+
+.popup.error {
+    background-color: #3a1f23;
+    color: #e2a4ab;
+}
+
+.popup.error svg.copy-btn {
+    fill: #e2a4ab;
+}
+
+.popup .close-btn {
+    fill: rgb(196, 100, 100);
+}
+
+@keyframes fadeInUpScale {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+.popup .popup-icon {
+    margin-right: 15px;
+    font-size: 20px;
+}
+
+.popup.info .popup-icon::before {
+    content: 'ℹ️';
+}
+
+.popup.success .popup-icon::before {
+    content: '✔️';
+}
+
+.popup.warning .popup-icon::before {
+    content: '⚠️';
+}
+
+.popup.error .popup-icon::before {
+    content: '❌';
+}
+
+.popup-message {
+    flex-grow: 1;
+    margin-right: 15px;
+    text-align: left;
+}
+
+.popup .close-button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 15px;
+    padding: 0;
+    transition: transform 0.2s ease;
+}
+
+.popup .close-button:hover {
+    transform: scale(1.2);
+}

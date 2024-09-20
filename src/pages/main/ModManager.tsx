@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../../style/main/ModManager.css'
+import { usePopup } from '../static/PopupContext';
 
 interface Entry {
     id: number,
@@ -8,7 +9,13 @@ interface Entry {
 }
 
 const ModManager = () => {
+    const { addPopup } = usePopup();
+
     useEffect(() => {
+        addPopup('success', 'Test message');
+        addPopup('warning', 'Test message');
+        addPopup('error', 'Test message');
+        addPopup('info', 'Test message');
         const fetchMods = async () => {
             const modList: ModList | null = await window.ipcRenderer.getManagedMods();
             if (!modList)
@@ -168,18 +175,18 @@ const ModManager = () => {
                         </div>
                     </div>
                 )
-            case 5: 
-            return (
-                <div className='mod-setting-wrapper'>
-                    <label>{label}</label>
-                    <select className='setting-dropdown' name="test">
-                        <option value="ooga">Ooga</option>
-                        <option value="booga">Booga</option>
-                        <option value="dooga">Dooga</option>
-                        <option value="yooga">Yooga</option>
-                    </select>
-                </div>
-            )
+            case 5:
+                return (
+                    <div className='mod-setting-wrapper'>
+                        <label>{label}</label>
+                        <select className='setting-dropdown' name="test">
+                            <option value="ooga">Ooga</option>
+                            <option value="booga">Booga</option>
+                            <option value="dooga">Dooga</option>
+                            <option value="yooga">Yooga</option>
+                        </select>
+                    </div>
+                )
             default:
                 return null;
         }
@@ -247,8 +254,11 @@ const ModManager = () => {
 
                 {entries.map((entry) => (
                     <div key={entry.id} className='mod-entry'>
-                        <input className='mod-checkbox' type="checkbox" checked={entry.enabled} onChange={(e) => handleModValueChange(entry.id, entry.modName, e.target.checked)} />
-                        <span>{entry.modName}</span>
+                        <span style={{ marginLeft: "20px" }}>{entry.modName}</span>
+                        <label className="switch" style={{ marginLeft: "auto", marginRight: "20px" }}>
+                            <input type="checkbox" />
+                            <span className="slider round"></span>
+                        </label>
                     </div>
                 ))}
 

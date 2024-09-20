@@ -349,6 +349,7 @@ ipcMain.on('download-tmm-core', async () => {
   fs.writeFileSync(installedModsFile, modListJson);
 
   win?.webContents.send('tmm-core-downloaded');
+  win?.webContents.send('add-popup', 'success', `Successfully downloaded mod: TMMCore`);
 });
 
 ipcMain.handle('is-core-installed', (): Promise<boolean> => {

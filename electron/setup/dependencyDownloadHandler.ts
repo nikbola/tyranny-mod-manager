@@ -33,6 +33,8 @@ export async function downloadExtMod(savePath: string, extractTo: string, url: s
             fs.unlinkSync(savePath);
             console.log('File extracted successfully!');
             win?.webContents.send('tmm-core-downloaded');
+            win?.webContents.send('add-popup', 'success', `Successfully downloaded mod: TMMCore`);
+
         } catch (err) {
             console.error('Failed to unzip the file:', err);
         }

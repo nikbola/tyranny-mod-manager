@@ -1,0 +1,84 @@
+.mod-downloads-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.mod-downloads-content {
+    background-color: var(--background-secondary);
+    border-radius: 8px;
+    padding-left: 40px;
+    padding-right: 40px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 60%;
+    height: 60%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.download-list-container {
+    width: 100%;
+    flex-grow: 1;
+    outline: 1px solid black;
+    border-radius: 5px;
+    overflow: overlay;
+    padding-right: 15px
+}
+
+.mod-downloads-content h2 {
+    margin-top: 40px;
+    margin-bottom: 40px;
+    flex-shrink: 0;
+}
+
+.mod-downloads-content button {
+    margin-top: 40px;
+    margin-bottom: 40px;
+    padding: 10px 20px;
+    background-image: linear-gradient(to left, var(--main-primary), var(--main-secondary));
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+    flex-shrink: 0;
+}
+
+.mod-download-entry {
+    padding-left: 40px;
+    padding-right: 40px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+
+    transition: box-shadow 0.25s ease-out;
+}
+
+.mod-download-entry:hover {
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.25);
+}
+
+.mod-download-entry label {
+    font-weight: bold;
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+.mod-download-entry button {
+    justify-self: end;
+
+    transition: scale 0.25s ease-out;
+}
+
+.mod-download-entry button:hover {
+    scale: 1.1;
+}

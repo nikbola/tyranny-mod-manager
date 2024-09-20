@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import '../../style/main/ModManager.css'
 
 interface Entry {
@@ -8,7 +8,6 @@ interface Entry {
 }
 
 const ModManager = () => {
-
     useEffect(() => {
         const fetchMods = async () => {
             const modList: ModList | null = await window.ipcRenderer.getManagedMods();
@@ -22,7 +21,6 @@ const ModManager = () => {
             }));
 
             setEntry(prevEntries => [...prevEntries, ...newEntries]);
-
         };
 
         window.ipcRenderer.on('register-mod-action', (_, message: ModActionPayload) => {
@@ -54,9 +52,9 @@ const ModManager = () => {
     ]);
 
     const [settings, setSettings] = useState<ModActionPayload[]>([
-        { id: "123123", label: "Test Button", modName: "Bag of Tricks 2.0", actionType: 1 },
-        { id: "234234", label: "Another Slider", modName: "Bag of Tricks 2.0", actionType: 0 },
-        { id: "345345", label: "Cool Toggle", modName: "Super Mod", actionType: 2 },
+        { id: "awdoiajwd", label: "Test Text", modName: "TMMCore", actionType: 3 },
+        { id: "awdoiajwd", label: "Test Number", modName: "TMMCore", actionType: 4 },
+        { id: "awdoiajwd", label: "Test Radio", modName: "TMMCore", actionType: 5 }
     ]);
 
     function onSlider(event: React.ChangeEvent<HTMLInputElement>) {
@@ -88,29 +86,100 @@ const ModManager = () => {
         window.ipcRenderer.send('setting-changed', jsonPayload);
     }
 
+    function onText(event: React.ChangeEvent<HTMLInputElement>) {
+        const payload = {
+            textValue: event.target.value,
+            id: event.target.id,
+            type: 3
+        };
+        const jsonPayload = JSON.stringify(payload);
+        window.ipcRenderer.send('setting-changed', jsonPayload);
+    }
+
+    function onNumber(event: React.ChangeEvent<HTMLInputElement>) {
+        const value = +event.target.value;
+        setNumber(value)
+        const payload = {
+            numberValue: value,
+            id: event.target.id,
+            type: 4
+        };
+        const jsonPayload = JSON.stringify(payload);
+        window.ipcRenderer.send('setting-changed', jsonPayload);
+    }
+
+    const [number, setNumber] = useState<number>(0);
+
+    function onDecrement() {
+        setNumber(prevNumber => prevNumber - 1);
+    }
+
+    function onIncrement() {
+        setNumber(prevNumber => prevNumber + 1);
+    }
+
+    const wrapperRef = useRef<HTMLDivElement>(null);
+    const fieldsetRef = useRef<HTMLFieldSetElement>(null);
+    useEffect(() => {
+        if (wrapperRef.current && fieldsetRef.current) {
+            const fieldsetHeight = fieldsetRef.current.offsetHeight;
+            wrapperRef.current.style.height = `${fieldsetHeight}px`;
+        }
+    }, []);
+
     const renderActionType = (actionType: number, label: string, action: ModActionPayload) => {
         switch (actionType) {
             case 0:
                 return (
-                    <div>
+                    <div className='mod-setting-wrapper'>
                         <label>{label}</label>
-                        <input id={action.id} className='setting-slider' type="range" min={action.min} max={action.max} onChange={onSlider}/>
+                        <input id={action.id} className='setting-slider' type="range" min={action.min} max={action.max} onChange={onSlider} />
                     </div>
                 );
             case 1:
                 return (
-                    <div>
+                    <div className='mod-setting-wrapper'>
                         <label>{label}</label>
                         <button id={action.id} onClick={onButton}>{label}</button>
                     </div>
                 );
             case 2:
                 return (
-                    <div>
+                    <div className='mod-setting-wrapper'>
                         <label>{label}</label>
                         <input id={action.id} onChange={onToggle} className='setting-toggle' type="checkbox" />
                     </div>
                 );
+            case 3:
+                return (
+                    <div className='mod-setting-wrapper'>
+                        <label>{label}</label>
+                        <input id={action.id} onChange={onText} className='setting-text' type="text" />
+                    </div>
+                );
+            case 4:
+                return (
+                    <div className='mod-setting-wrapper'>
+                        <label>{label}</label>
+                        <div className='number-input-container'>
+                            <button onClick={onDecrement}>-</button>
+                            <input id={action.id} min='1' max='10' onChange={onNumber} className='setting-number' type="number" value={number} />
+                            <button onClick={onIncrement}>+</button>
+                        </div>
+                    </div>
+                )
+            case 5: 
+            return (
+                <div className='mod-setting-wrapper'>
+                    <label>{label}</label>
+                    <select className='setting-dropdown' name="test">
+                        <option value="ooga">Ooga</option>
+                        <option value="booga">Booga</option>
+                        <option value="dooga">Dooga</option>
+                        <option value="yooga">Yooga</option>
+                    </select>
+                </div>
+            )
             default:
                 return null;
         }
@@ -171,7 +240,7 @@ const ModManager = () => {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 style={{
-                    border: dragging ? '2px dashed var(--purple-secondary)' : '2px solid var(--purple-primary)',
+                    border: dragging ? '2px dashed var(--main-secondary)' : '2px solid var(--main-primary)',
                 }}
             >
                 <h3 className='mod-list-header'>Mod List</h3>
@@ -186,27 +255,37 @@ const ModManager = () => {
             </div>
             <div className='mod-settings-list'
                 style={{
-                    border: dragging ? '2px dashed var(--purple-secondary)' : '2px solid var(--purple-primary)',
+                    border: dragging ? '2px dashed var(--main-secondary)' : '2px solid var(--main-primary)',
                 }}
             >
                 <h3 className='mod-settings-header'>Mod Settings</h3>
-                {Object.keys(groupedSettings).map((modName) => (
-                    <div key={modName} className="mod-category">
-                        <h2 onClick={() => toggleExpand(modName)} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                            {modName} {expandedMods[modName] ? '-' : '+'}
-                        </h2>
+                {Object.keys(groupedSettings).length > 0 ? (
+                    Object.keys(groupedSettings).map((modName) => (
+                        groupedSettings[modName] && groupedSettings[modName].length > 0 ? (
+                            <div key={modName} className="mod-category">
+                                <h2 onClick={() => toggleExpand(modName)} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                                    {modName} {expandedMods[modName] ? '-' : '+'}
+                                </h2>
 
-                        {expandedMods[modName] && (
-                            <div className="mod-entries">
-                                {groupedSettings[modName].map((setting) => (
-                                    <div key={setting.id} className="mod-setting">
-                                        {renderActionType(setting.actionType, setting.label, setting)}
+                                {expandedMods[modName] && (
+                                    <div className="mod-entries">
+                                        {groupedSettings[modName].map((setting) => (
+                                            <div key={setting.id} className="mod-setting">
+                                                {renderActionType(setting.actionType, setting.label, setting)}
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
+                                )}
                             </div>
-                        )}
+                        ) : null // Optionally, handle empty modName if needed
+                    ))
+                ) : (
+                    <div className="no-settings-message">
+                        <p>-No settings to display-</p>
+                        <p>Mod settings will not be displayed while the game is off</p>
                     </div>
-                ))}
+                )}
+
             </div>
         </>
     );

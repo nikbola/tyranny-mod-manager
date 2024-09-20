@@ -19,3 +19,8 @@ interface ModActionPayload {
     min?: number,
     max?: number
 }
+
+interface ExtModEntry {
+    name: string,
+    url: string
+}

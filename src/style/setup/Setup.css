@@ -35,12 +35,12 @@ input {
 }
 
 .browse-button:hover {
-    outline: var(--purple-primary);
+    outline: var(--main-primary);
     scale: 1.1;
 }
 
 .continue-button {
-    background-image: linear-gradient(to top right, var(--purple-primary), var(--purple-secondary));
+    background-image: linear-gradient(to top right, var(--main-primary), var(--main-secondary));
 }
 
 .cancel-button {
@@ -86,12 +86,11 @@ input {
 
 .progress-bar {
     height: 100%;
-    background-color: #6a1b9a; /* You can customize this to match your theme */
-    width: 0%; /* Will be updated dynamically based on progress */
-    transition: width 0.25s ease-in-out; /* Smooth transition */
+    background-color: var(--main-primary);
+    width: 0%;
 }
 
 .progress-bar-fill {
     height: 100%;
-    background-color: #ff7e5f; /* This color can also be customized */
+    background-color: #ff7e5f;
 }

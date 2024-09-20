@@ -7,7 +7,7 @@ import fs from 'fs';
 import { createFileSync, ensureDir, moveSync } from 'fs-extra'
 import AdmZip from 'adm-zip';
 import net from 'net';
-import { downloadReleaseFile } from './setup/dependencyDownloadHandler'
+import { downloadExtMod } from './setup/dependencyDownloadHandler'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -39,6 +39,8 @@ let tcpClient: net.Socket;
 function createWindow() {
   win = new BrowserWindow({
     minWidth: 800,
+    width: 1000,
+    height: 750,
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
@@ -52,15 +54,15 @@ function createWindow() {
     ipcMain.on('renderer-ready', () => {
       let isConnected = false;
       let reconnectionTimeout: NodeJS.Timeout;
-    
+
       const connectToServer = () => {
         tcpClient = new net.Socket();
-    
+
         tcpClient.on('connect', () => {
           isConnected = true;
           console.log('Connected to .NET TCP server');
         });
-    
+
         tcpClient.on('data', (data) => {
           const jsonString = data.toString('utf-8');
           try {
@@ -71,38 +73,38 @@ function createWindow() {
             console.error('Failed to parse JSON:', error);
           }
         });
-    
+
         tcpClient.on('close', (hadError) => {
-          win?.webContents.send('connection-closed');
+          //win?.webContents.send('connection-closed');
           if (isConnected || hadError) {
             isConnected = false;
             attemptReconnection();
           }
         });
-    
+
         tcpClient.on('error', (err) => {
           console.error('Error occurred:', err.message);
         });
-    
+
         tcpClient.connect(8181, '127.0.0.1');
       };
-    
+
       const attemptReconnection = () => {
         if (reconnectionTimeout) {
           clearTimeout(reconnectionTimeout);
         }
-    
+
         reconnectionTimeout = setTimeout(() => {
           console.log('Attempting to reconnect to .NET TCP server...');
           if (!isConnected) {
             tcpClient.removeAllListeners();
             tcpClient.destroy();
-    
+
             connectToServer();
           }
         }, 5000);
       };
-    
+
       connectToServer();
     });
 
@@ -211,11 +213,10 @@ ipcMain.handle('install-mod', async (_, file): Promise<{ modName: string } | nul
 
   const fileName = path.basename(file);
   const fileExt = path.extname(file);
-  const targetPath = join(pluginsDir, fileName);
+  const zipFileNameWithoutExt = path.basename(file, fileExt);
+  const targetPath = path.join(pluginsDir, fileName);
 
   fs.copyFileSync(file, targetPath);
-
-  let containsDll = false;
 
   if (fileExt === '.zip') {
     try {
@@ -223,49 +224,49 @@ ipcMain.handle('install-mod', async (_, file): Promise<{ modName: string } | nul
       const zipEntries = zip.getEntries();
 
       const topLevelItems = new Set<string>();
-      zipEntries.forEach((entry) => {
-        const topLevelItem = entry.entryName.split('/')[0];
-        topLevelItems.add(topLevelItem);
+      let hasTopLevelFiles = false;
 
-        if (path.extname(entry.entryName) === '.dll') {
-          containsDll = true;
+      zipEntries.forEach((entry) => {
+        const entryName = entry.entryName;
+        const pathParts = entryName.split('/').filter((part) => part.length > 0);
+
+        if (pathParts.length > 0) {
+          const topLevelItem = pathParts[0];
+          topLevelItems.add(topLevelItem);
+
+          if (!entry.isDirectory && pathParts.length === 1) {
+            hasTopLevelFiles = true;
+          }
         }
       });
 
       let extractedDirName = '';
 
-      if (topLevelItems.size === 1) {
-        const singleItem = Array.from(topLevelItems)[0];
-        extractedDirName = singleItem;
-        const mainDir = join(pluginsDir, singleItem);
+      if (topLevelItems.size === 1 && !hasTopLevelFiles) {
+        extractedDirName = Array.from(topLevelItems)[0];
         zip.extractAllTo(pluginsDir, true);
-        console.log(`Extracted directory ${singleItem} to ${mainDir}`);
+        console.log(`Extracted to existing folder: ${extractedDirName}`);
       } else {
-        extractedDirName = path.basename(file, '.zip');
-        const extractTo = join(pluginsDir, extractedDirName);
+        extractedDirName = zipFileNameWithoutExt;
+        const extractTo = path.join(pluginsDir, extractedDirName);
         zip.extractAllTo(extractTo, true);
-        console.log(`File unzipped to: ${extractTo}`);
-      }
-
-      if (containsDll) {
-        console.log('The archive contains at least one .dll file.');
-      } else {
-        console.log('No .dll files were found in the archive.');
+        console.log(`Extracted to new folder: ${extractedDirName}`);
       }
 
       fs.unlinkSync(targetPath);
 
-      if (!fs.existsSync(installedModsFile))
+      if (!fs.existsSync(installedModsFile)) {
         createFileSync(installedModsFile);
+      }
 
-      const installedMods = fs.readFileSync(installedModsFile, 'utf-8');
+      let modInfo: ModList;
 
-      let modInfo;
-      if (installedMods)
-        modInfo = JSON.parse(installedMods) as ModList;
-
-      if (!modInfo)
+      const installedModsContent = fs.readFileSync(installedModsFile, 'utf-8');
+      if (installedModsContent) {
+        modInfo = JSON.parse(installedModsContent) as ModList;
+      } else {
         modInfo = { mods: [] };
+      }
 
       modInfo.mods.push({ name: extractedDirName, enabled: true });
 
@@ -281,6 +282,7 @@ ipcMain.handle('install-mod', async (_, file): Promise<{ modName: string } | nul
 
   return Promise.resolve(null);
 });
+
 
 ipcMain.handle('update-mod-status', (_, id, modName, enabled) => {
   console.log(id);
@@ -324,8 +326,27 @@ ipcMain.on('download-tmm-core', async () => {
   if (!fs.existsSync(pluginsDir))
     await ensureDir(pluginsDir);
 
-  if (win)
-    await downloadReleaseFile(path.join(pluginsDir, 'TMMCore.zip'), pluginsDir, win);
+  if (win) {
+    const url = 'https://github.com/nikbola/TMMCore/releases/download/pre-release/TMMCore.zip';
+    await downloadExtMod(path.join(pluginsDir, 'TMMCore.zip'), pluginsDir, url, win);
+  }
+
+  if (!fs.existsSync(installedModsFile))
+    createFileSync(installedModsFile);
+
+  const installedMods = fs.readFileSync(installedModsFile, 'utf-8');
+
+  let modInfo;
+  if (installedMods)
+    modInfo = JSON.parse(installedMods) as ModList;
+
+  if (!modInfo)
+    modInfo = { mods: [] };
+
+  modInfo.mods.push({ name: "TMMCore", enabled: true });
+
+  const modListJson = JSON.stringify(modInfo, null, 2);
+  fs.writeFileSync(installedModsFile, modListJson);
 
   win?.webContents.send('tmm-core-downloaded');
 });
@@ -358,4 +379,14 @@ ipcMain.on('open-tyranny-folder', () => {
 
 ipcMain.on('setting-changed', (_: any, payload: string) => {
   tcpClient.write(payload);
+})
+
+ipcMain.on('launch-tyranny', () => {
+  if (fs.existsSync(execFile))
+    shell.openPath(execFile);
+});
+
+ipcMain.on('download-ext-mod', async (_, url, modName: string) => {
+  if (win)
+    await downloadExtMod(path.join(pluginsDir, modName + '.zip'), pluginsDir, url, win);
 })

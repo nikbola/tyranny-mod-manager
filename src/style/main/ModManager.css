@@ -117,7 +117,7 @@
 }
 
 .mod-category:hover {
-    border: solid 2px var(--purple-primary);
+    border: solid 2px var(--main-primary);
 }
 
 .mod-setting {
@@ -138,12 +138,12 @@
     background-color: var(--background-secondary);
 }
 
-.mod-setting div {
+.mod-setting-wrapper {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    margin: 0 auto; 
+    margin: 0 auto;
 }
 
 .mod-setting div label {
@@ -159,6 +159,70 @@
 .setting-toggle {
     width: 25px;
     height: 25px;
+}
+
+.setting-text {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.number-input-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.setting-number {
+    width: 50px;
+    text-align: center;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.setting-dropdown {
+    width: 600px;
+    height: 44px;
+}
+
+select {
+    background-color: #121212;
+    border: 1px solid transparent;
+    
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 16px;
+    color: white;
+    /*appearance: none; /* Removes default arrow (doesn't work on all browsers) */
+    -webkit-appearance: none;
+    cursor: pointer;
+
+    transition: border 0.25s ease-out;
+}
+
+select:focus {
+    border: 1px solid var(--main-primary);
+    outline: none;
+}
+
+select option {
+    background-color: #121212;
+
+    color: white;
+    padding: 10px;
+}
+
+select option:hover {
+    background-color: white;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.no-settings-message {
+    color: #a1a1a1;
 }
 
 input {
@@ -185,7 +249,7 @@ input[type='range']::-webkit-slider-thumb {
     height: 20px;
     transform: translateY(-25%);
     border-radius: 50%;
-    background: var(--purple-primary);
+    background: var(--main-primary);
     cursor: pointer;
     border: 2px solid #fff;
     transition: background 0.25s ease-out, border-radius 0.25s ease-out;
@@ -195,11 +259,17 @@ input[type='range']::-webkit-slider-runnable-track {
     width: 100%;
     height: 8px;
     border-radius: 5px;
-    background: linear-gradient(90deg, var(--purple-secondary) 0%, var(--purple-primary) 100%);
+    background: linear-gradient(90deg, var(--main-secondary) 0%, var(--main-primary) 100%);
     cursor: pointer;
 }
 
 input[type='range']:focus::-webkit-slider-thumb {
-    background: var(--purple-secondary);
+    background: var(--main-secondary);
     border-radius: 0;
+}
+
+input[type="checkbox"] {
+    accent-color: var(--main-primary);
+    width: 20px;
+    height: 20px;
 }

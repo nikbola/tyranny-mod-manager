@@ -26,7 +26,38 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--purple-primary);
-    background-image: linear-gradient(to right, var(--purple-primary), var(--purple-secondary));
+    background-color: var(--main-primary);
+    background-image: linear-gradient(to bottom left, var(--main-primary), var(--main-secondary));
     text-align: center;
 }
+
+.logo {
+    height: 50px;
+    width: auto;
+    left: 20px;
+    position: absolute;
+}
+
+.category-button {
+    margin-right: 20px;
+    background-color: transparent;
+    position: relative;
+}
+
+.category-button::after {
+    content: '';
+    width: 0;
+    height: 2px;
+    background-color: white;
+    display: block;
+    transition: width 0.25s ease-out, background-color 0.25s ease-out;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+}
+
+.category-button:hover::after {
+    width: 100%;
+    background-color: var(--main-primary);
+}
+

@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 
 function DownloadDependenciesPage() {
 
-    const [downloadProgress, setDownloadProgress] = useState(0);
     const [isDownloading, setIsDownloading] = useState(false);
     const navigate = useNavigate();
 
@@ -16,10 +15,6 @@ function DownloadDependenciesPage() {
                 return;
             }
 
-            const handleDownloadProgress = (_: any, progress: number) => {
-                setDownloadProgress(progress);
-            };
-
             const handleModDownloaded = () => {
                 setIsDownloading(false);
                 setTimeout(() => {
@@ -28,11 +23,9 @@ function DownloadDependenciesPage() {
             };
 
             window.ipcRenderer.on('tmm-core-downloaded', handleModDownloaded);
-            window.ipcRenderer.on('tmm-core-download-progress', handleDownloadProgress);
 
             return () => {
                 window.ipcRenderer.off('tmm-core-downloaded', handleModDownloaded);
-                window.ipcRenderer.off('tmm-core-download-progress', handleDownloadProgress);
             };
         }
         handleModDownload();
@@ -62,10 +55,6 @@ function DownloadDependenciesPage() {
                 <button className='cancel-button' onClick={handleCancel}>
                     Skip
                 </button>
-            </div>
-
-            <div className="progress-bar-container">
-                <div className="progress-bar" style={{ width: `${downloadProgress}%` }}></div>
             </div>
         </>
     );

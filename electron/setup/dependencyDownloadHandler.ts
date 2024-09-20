@@ -3,9 +3,7 @@ import fetch from 'node-fetch';
 import AdmZip from 'adm-zip';
 import { BrowserWindow } from 'electron';
 
-export async function downloadReleaseFile(savePath: string, extractTo: string, win: BrowserWindow) {
-    const url = 'https://github.com/nikbola/tyranny-mod-manager/releases/download/Pre-release/TMMCore.zip';
-
+export async function downloadExtMod(savePath: string, extractTo: string, url: string, win: BrowserWindow) {
     const res = await fetch(url).catch(() => null);
 
     if (res && res.ok && res.body) {

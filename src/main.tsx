@@ -6,6 +6,8 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import DownloadDependenciesPage from './pages/setup/DownloadDependenciesPage.tsx';
 import BepInExDownloadPage from './pages/setup/BepInExDownloadHandler.tsx';
 import TopBar from './pages/static/TopBar.tsx';
+import ModDownloads from './pages/main/ModDownloads.tsx';
+import ProgressBar from './pages/static/ProgressBar.tsx';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <Router>
@@ -15,6 +17,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <Route path="/download-dependencies" element={<DownloadDependenciesPage />} /> {/* Front page for requesting paths */}
       <Route path="/mod-manager" element={<ModManager />} /> {/* The current page */}
     </Routes>
+    <ProgressBar></ProgressBar>
     <TopBar></TopBar>
   </Router>
 )

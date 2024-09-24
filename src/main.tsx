@@ -14,10 +14,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <PopupProvider>
   <Router>
     <Routes>  
-      <Route path="/" element={<PathReqPage />} /> {/* Front page for requesting paths */}
-      <Route path="/bep-in-ex-dependencies" element={<BepInExDownloadPage />} /> {/* Front page for requesting paths */}
-      <Route path="/download-dependencies" element={<DownloadDependenciesPage />} /> {/* Front page for requesting paths */}
-      <Route path="/mod-manager" element={<ModManager />} /> {/* The current page */}
+      <Route path="/" element={<PathReqPage />} />
+      <Route path="/bep-in-ex-dependencies" element={<BepInExDownloadPage />} />
+      <Route path="/download-dependencies" element={<DownloadDependenciesPage />} />
+      <Route path="/mod-manager" element={<ModManager />} />
     </Routes>
     <ProgressBar></ProgressBar>
     <TopBar></TopBar>

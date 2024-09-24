@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../../style/main/ModManager.css'
-import { usePopup } from '../static/PopupContext';
 
 interface Entry {
     id: number,
@@ -9,13 +8,7 @@ interface Entry {
 }
 
 const ModManager = () => {
-    const { addPopup } = usePopup();
-
     useEffect(() => {
-        addPopup('success', 'Test message');
-        addPopup('warning', 'Test message');
-        addPopup('error', 'Test message');
-        addPopup('info', 'Test message');
         const fetchMods = async () => {
             const modList: ModList | null = await window.ipcRenderer.getManagedMods();
             if (!modList)

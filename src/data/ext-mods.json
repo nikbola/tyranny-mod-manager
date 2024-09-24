@@ -1,6 +1,7 @@
 [
     {
         "name": "TMMCore",
-        "url": "https://github.com/nikbola/TMMCore/releases/download/pre-release/TMMCore.zip"
+        "url": "https://github.com/nikbola/TMMCore/releases/download/pre-release/TMMCore.zip",
+        "desc": "Enables communication between Tyranny Mod Manager and the game. This is required for mods that utilize Tyranny Mod Manager for its mod UI"
     }
 ]

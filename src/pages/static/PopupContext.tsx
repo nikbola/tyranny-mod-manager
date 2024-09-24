@@ -1,4 +1,3 @@
-// PopupContext.tsx
 import React, { createContext, useState, useContext } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import PopupContainer from './Popup';
@@ -14,6 +13,7 @@ interface Popup {
 
 interface PopupContextProps {
     addPopup: (type: PopupType, message: string) => void;
+    removePopup: (id: string) => void;
 }
 
 const PopupContext = createContext<PopupContextProps | undefined>(undefined);
@@ -50,8 +50,12 @@ export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }, 4000);
     };
 
+    const removePopup = (id: string) => {
+        setPopups(prev => prev.filter(popup => popup.id !== id));
+    }
+
     return (
-        <PopupContext.Provider value={{ addPopup }}>
+        <PopupContext.Provider value={{ addPopup, removePopup }}>
             {children}
             <PopupContainer popups={popups} />
         </PopupContext.Provider>

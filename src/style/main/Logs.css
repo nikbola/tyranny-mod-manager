@@ -1,0 +1,31 @@
+.log-entry {
+    width: auto;
+    height: auto;
+    overflow-wrap: break-word;
+    margin-top: 10px;
+    text-align: left;
+    padding-left: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.log-entry .log-entry-meta {
+    font-weight: bold;
+    margin-right: 20px;
+}
+
+.log-entry.info {
+    color: #ccc;
+}
+
+.log-entry.error {
+    color: #e2a4ab;
+}
+
+.log-entry.success {
+    color: #75e5b0;
+}
+
+.log-entry.warning {
+    color: #e1ad70;
+}

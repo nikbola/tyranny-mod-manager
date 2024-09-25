@@ -24,3 +24,9 @@ interface ExtModEntry {
     name: string,
     url: string
 }
+
+interface LogInfo {
+    logType: 'Info' | 'Success' | 'Warning' | 'Error',
+    content: string,
+    timestamp: string
+}

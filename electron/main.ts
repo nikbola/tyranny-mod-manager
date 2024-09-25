@@ -8,21 +8,31 @@ import { createFileSync, ensureDir, moveSync } from 'fs-extra'
 import AdmZip from 'adm-zip';
 import net from 'net';
 import { downloadExtMod } from './setup/dependencyDownloadHandler'
+import { Logger } from './logs/Logger'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const appDataDir = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share");
 const dataDir = join(appDataDir, 'Tyranny Mod Manager');
 const persistentDataDir = join(dataDir, 'persistent-data');
+const logsDir = join(dataDir, 'logs');
 const disabledModsDir = join(dataDir, 'mods');
 const cachedPathsFile = join(persistentDataDir, 'paths.json');
 const installedModsFile = join(persistentDataDir, 'modList.json');
+
+const currentDate = new Date();
+const formattedDate = `${String(currentDate.getDate()).padStart(2, '0')}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${currentDate.getFullYear()} (${String(currentDate.getHours()).padStart(2, '0')};${String(currentDate.getMinutes()).padStart(2, '0')})`;
+const logsFile = join(logsDir, `${formattedDate}.log`);
 
 let execFile: string;
 let gameDir: string;
 let pluginsDir: string;
 
 ensureDir(persistentDataDir);
+ensureDir(disabledModsDir);
+ensureDir(logsDir);
+
+let logger: Logger;
 
 process.env.APP_ROOT = path.join(__dirname, '..')
 
@@ -46,6 +56,9 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.mjs'),
     },
   })
+
+  logger = new Logger(logsFile, win);
+  logger.removeOldLogs();
 
   win.webContents.on('did-finish-load', () => {
     win?.webContents.send('main-process-message', (new Date).toLocaleString())
@@ -205,6 +218,7 @@ ipcMain.handle('check-cached-path', async (): Promise<string | null> => {
   if (fs.existsSync(pluginsDir)) {
     ensureDir(pluginsDir);
   }
+  logger.log(`Found cached path: ${execPath}`);
   return Promise.resolve(execPath);
 });
 
@@ -390,4 +404,23 @@ ipcMain.on('launch-tyranny', () => {
 ipcMain.on('download-ext-mod', async (_, url, modName: string) => {
   if (win)
     await downloadExtMod(path.join(pluginsDir, modName + '.zip'), pluginsDir, url, win);
-})
+});
+
+ipcMain.on('log', (_, type, message) => {
+  switch (type) {
+    case 'Info':
+      logger.log(message);
+      break;
+    case 'Success':
+      logger.success(message);
+      break;
+    case 'Warning':
+      logger.warn(message);
+      break;
+    case 'Error':
+      logger.error(message, undefined);
+      break;
+    default:
+      break;
+  }
+});

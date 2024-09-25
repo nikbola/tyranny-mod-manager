@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../../style/main/ModManager.css'
+import { useLogs } from './LogContext';
 
 interface Entry {
     id: number,
@@ -8,6 +9,8 @@ interface Entry {
 }
 
 const ModManager = () => {
+    const { addLog } = useLogs();
+
     useEffect(() => {
         const fetchMods = async () => {
             const modList: ModList | null = await window.ipcRenderer.getManagedMods();
@@ -19,8 +22,9 @@ const ModManager = () => {
                 modName: mod.name,
                 enabled: mod.enabled,
             }));
-
             setEntry(prevEntries => [...prevEntries, ...newEntries]);
+
+            addLog('Error', 'HELLO!?');
         };
 
         window.ipcRenderer.on('register-mod-action', (_, message: ModActionPayload) => {
@@ -53,8 +57,8 @@ const ModManager = () => {
 
     const [settings, setSettings] = useState<ModActionPayload[]>([
         { id: "awdoiajwd", label: "Test Text", modName: "TMMCore", actionType: 3 },
-        { id: "awdoiajwd", label: "Test Number", modName: "TMMCore", actionType: 4 },
-        { id: "awdoiajwd", label: "Test Radio", modName: "TMMCore", actionType: 5 }
+        { id: "awdoiajw", label: "Test Number", modName: "TMMCore", actionType: 4 },
+        { id: "awdoiaj", label: "Test Radio", modName: "TMMCore", actionType: 5 }
     ]);
 
     function onSlider(event: React.ChangeEvent<HTMLInputElement>) {

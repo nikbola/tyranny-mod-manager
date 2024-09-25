@@ -9,20 +9,23 @@ import BepInExDownloadPage from './pages/setup/BepInExDownloadHandler.tsx';
 import TopBar from './pages/static/TopBar.tsx';
 import ProgressBar from './pages/static/ProgressBar.tsx';
 import { PopupProvider } from './pages/static/PopupContext.tsx'
+import { LogProvider } from './pages/main/LogContext.tsx'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <PopupProvider>
-  <Router>
-    <Routes>  
-      <Route path="/" element={<PathReqPage />} />
-      <Route path="/bep-in-ex-dependencies" element={<BepInExDownloadPage />} />
-      <Route path="/download-dependencies" element={<DownloadDependenciesPage />} />
-      <Route path="/mod-manager" element={<ModManager />} />
-    </Routes>
-    <ProgressBar></ProgressBar>
-    <TopBar></TopBar>
-  </Router>
-  </PopupProvider>
+  <LogProvider>
+    <PopupProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<PathReqPage />} />
+          <Route path="/bep-in-ex-dependencies" element={<BepInExDownloadPage />} />
+          <Route path="/download-dependencies" element={<DownloadDependenciesPage />} />
+          <Route path="/mod-manager" element={<ModManager />} />
+        </Routes>
+        <ProgressBar></ProgressBar>
+        <TopBar></TopBar>
+      </Router>
+    </PopupProvider>
+  </LogProvider>
 )
 
 window.ipcRenderer.on('main-process-message', (_event, message) => {

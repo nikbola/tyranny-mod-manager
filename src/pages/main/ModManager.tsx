@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../../style/main/ModManager.css'
-import { useLogs } from './LogContext';
 
 interface Entry {
     id: number,
@@ -9,8 +8,6 @@ interface Entry {
 }
 
 const ModManager = () => {
-    const { addLog } = useLogs();
-
     useEffect(() => {
         const fetchMods = async () => {
             const modList: ModList | null = await window.ipcRenderer.getManagedMods();
@@ -23,8 +20,6 @@ const ModManager = () => {
                 enabled: mod.enabled,
             }));
             setEntry(prevEntries => [...prevEntries, ...newEntries]);
-
-            addLog('Error', 'HELLO!?');
         };
 
         window.ipcRenderer.on('register-mod-action', (_, message: ModActionPayload) => {

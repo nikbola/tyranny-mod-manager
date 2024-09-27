@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../../style/main/ModManager.css';
 import dropdownArrow from '../../assets/caret-forward-outline.svg';
+import ContextBar from '../static/ContextBar';
+import { usePopup } from '../static/PopupContext';
 
 interface Entry {
     id: number,
@@ -9,6 +11,7 @@ interface Entry {
 }
 
 const ModManager = () => {
+    const { addPopup } = usePopup();
     const [expandedMods, setExpandedMods] = useState<Record<string, boolean>>({});
     const [selectedEntries, setSelectedEntries] = useState<string[]>([]);
 
@@ -314,6 +317,38 @@ const ModManager = () => {
                 )}
 
             </div>
+            {selectedEntries.length > 0 && <ContextBar button={[
+                { text: 'Open Mods Folder', onClick: () => { 
+                    console.log("Opening mods folder");
+                    window.ipcRenderer.send('open-mods-folder');
+                }},
+                {
+                    text: 'Uninstall', color: 'var(--main-red)', onClick: async () => {
+                        window.ipcRenderer.send('log', 'Info', `Uninstalling mod: ${selectedEntries[0]}`);
+                        const entryList: ModInfo[] = []; 
+                        entries.forEach((entry) => {
+                            if (selectedEntries.includes(entry.modName)) {
+                                entryList.push({ name: entry.modName, enabled: entry.enabled } as ModInfo);
+                            }
+                        });
+
+                        console.log(entryList);
+                        const results = await window.ipcRenderer.uninstallMod(entryList);
+
+                        results.forEach((result) => {
+                            if (result.status) {
+                                window.ipcRenderer.send('log', 'Success', `Uninstalled mod: ${result.modName}`);
+                                addPopup('success', `Uninstalled mod: ${result.modName}`);
+                            } else {
+                                window.ipcRenderer.send('log', 'Error', `Failed to uninstall mod: ${result.modName}`);
+                                addPopup('error', `Failed to uninstall mod: ${result.modName}. Reason: ${result.reason}`);
+                            }
+                        });
+                        setEntry((mods) => mods.filter((mod) => !selectedEntries.includes(mod.modName)));
+                        setSelectedEntries([]);
+                    }
+                }
+            ]} label={`Manage ${selectedEntries.length > 1 ? 'selected mods' : selectedEntries[0]}`}></ContextBar>}
         </>
     );
 };

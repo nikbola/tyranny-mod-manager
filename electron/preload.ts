@@ -43,5 +43,8 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   },
   isBepInExInstalled: () => {
     return ipcRenderer.invoke('is-bep-in-ex-installed');
+  },
+  uninstallMod: (modInfo: ModInfo[]) => {
+    return ipcRenderer.invoke('uninstall-mod', modInfo);
   }
 })

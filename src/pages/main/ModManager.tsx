@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import '../../style/main/ModManager.css'
-import dropdownArrow from '../../assets/caret-forward-outline.svg'
+import '../../style/main/ModManager.css';
+import dropdownArrow from '../../assets/caret-forward-outline.svg';
 
 interface Entry {
     id: number,
@@ -10,6 +10,7 @@ interface Entry {
 
 const ModManager = () => {
     const [expandedMods, setExpandedMods] = useState<Record<string, boolean>>({});
+    const [selectedEntries, setSelectedEntries] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchMods = async () => {
@@ -37,6 +38,10 @@ const ModManager = () => {
         fetchMods();
     }, []);
 
+    function selectModEntry(modName: string) {
+        setSelectedEntries([modName]);
+    }
+
     const handleModStatusChange = (id: number, modName: string, enabled: boolean) => {
 
         setEntry((mods) =>
@@ -51,7 +56,7 @@ const ModManager = () => {
 
     const [dragging, setDragging] = useState(false);
     const [entries, setEntry] = useState<Entry[]>([
-        //{ id: 0, modName: "Debug Mod", enabled: true }
+        { id: 0, modName: "Debug Mod", enabled: true }
     ]);
 
     const [settings, setSettings] = useState<ModActionPayload[]>([
@@ -141,7 +146,7 @@ const ModManager = () => {
                 return (
                     <div className='mod-setting-wrapper'>
                         <label>{label}</label>
-                        <div className="toggle-switch" style={{width: "60px"}}>
+                        <div className="toggle-switch" style={{ width: "60px" }}>
                             <label className="switch">
                                 <input type="checkbox" id={action.id} onChange={onToggle} />
                                 <span className="slider round"></span>
@@ -259,21 +264,23 @@ const ModManager = () => {
                 <h3 className='mod-list-header'>Mod List</h3>
 
                 {entries.map((entry) => (
-                    <div key={entry.id} className='mod-entry'>
+                    <div key={entry.id} className={`mod-entry ${selectedEntries.includes(entry.modName) ? 'selected' : ''}`} onClick={(e) => {
+                        if (!(e.target as HTMLElement).closest('.switch')) {
+                            selectModEntry(entry.modName);
+                        }
+                    }}>
                         <span style={{ marginLeft: "20px" }}>{entry.modName}</span>
                         <label className="switch" style={{ marginLeft: "auto", marginRight: "20px" }}>
-                            <input type="checkbox" checked={entry.enabled} onChange={(e) => handleModStatusChange(entry.id, entry.modName, e.target.checked)}/>
+                            <input type="checkbox" checked={entry.enabled} onChange={(e) => handleModStatusChange(entry.id, entry.modName, e.target.checked)} />
                             <span className="slider round"></span>
                         </label>
                     </div>
                 ))}
-
             </div>
             <div className='mod-settings-list'
                 style={{
                     border: dragging ? '2px dashed var(--main-secondary)' : '2px solid var(--main-primary)',
-                }}
-            >
+                }}>
                 <h3 className='mod-settings-header'>Mod Settings</h3>
                 {Object.keys(groupedSettings).length > 0 ? (
                     Object.keys(groupedSettings).map((modName, id) => (

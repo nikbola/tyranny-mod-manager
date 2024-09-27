@@ -298,25 +298,32 @@ ipcMain.handle('install-mod', async (_, file): Promise<{ modName: string } | nul
 
 
 ipcMain.handle('update-mod-status', (_, id, modName, enabled) => {
-  console.log(id);
-  const modPath = enabled ? join(disabledModsDir, modName) : join(pluginsDir, modName);
-  const targetPath = enabled ? join(pluginsDir, modName) : join(disabledModsDir, modName);
-  moveSync(modPath, targetPath);
-
-  const installedMods = fs.readFileSync(installedModsFile, 'utf-8');
-
-  let modInfo;
-  if (installedMods)
-    modInfo = JSON.parse(installedMods) as ModList;
-
-  if (!modInfo)
-    modInfo = { mods: [] };
-
-  const index = modInfo.mods.findIndex(mod => mod.name == modName);
-  modInfo.mods[index] = { name: modName, enabled: enabled };
-
-  const modListJson = JSON.stringify(modInfo, null, 2);
-  fs.writeFileSync(installedModsFile, modListJson);
+  try {
+    const modPath = enabled ? join(disabledModsDir, modName) : join(pluginsDir, modName);
+    const targetPath = enabled ? join(pluginsDir, modName) : join(disabledModsDir, modName);
+    moveSync(modPath, targetPath);
+  
+    const installedMods = fs.readFileSync(installedModsFile, 'utf-8');
+  
+    let modInfo;
+    if (installedMods)
+      modInfo = JSON.parse(installedMods) as ModList;
+  
+    if (!modInfo)
+      modInfo = { mods: [] };
+  
+    const index = modInfo.mods.findIndex(mod => mod.name == modName);
+    modInfo.mods[index] = { name: modName, enabled: enabled };
+  
+    const modListJson = JSON.stringify(modInfo, null, 2);
+    fs.writeFileSync(installedModsFile, modListJson);
+    logger.success(`Successfully ${enabled ? 'enabled' : 'disabled'} mod: ${modName}`);
+    win?.webContents.send('add-popup', 'success', `Successfully ${enabled ? 'enabled' : 'disabled'} mod: ${modName}`);  
+  } catch (error) {
+    console.error('Error updating mod status:', error);
+    logger.error('Error updating mod status:', error as Error);
+    win?.webContents.send('add-popup', 'error', `Something went wrong while updating mod status: ${modName}. See logs for more info`);  
+  }
 })
 
 ipcMain.handle('get-managed-mods', (): Promise<ModList> => {

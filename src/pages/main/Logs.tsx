@@ -9,7 +9,7 @@ const Log: React.FC<LogInfo> = ({ logType, content, timestamp }) => {
     return (
         <>
             <div className={`log-entry ${logType.toLowerCase()}`}>
-                <span className='log-entry-meta'>[{logType}, {timestamp}]</span>
+                <span className='log-entry-meta'>[{logType}, {timestamp}]</span><br />
                 <span className='log-entry-body'>{content}</span>
             </div>
         </>

@@ -37,7 +37,7 @@ const ModManager = () => {
         fetchMods();
     }, []);
 
-    const handleModValueChange = (id: number, modName: string, enabled: boolean) => {
+    const handleModStatusChange = (id: number, modName: string, enabled: boolean) => {
 
         setEntry((mods) =>
             mods.map((mod) =>
@@ -45,6 +45,7 @@ const ModManager = () => {
             )
         );
 
+        window.ipcRenderer.send('log', 'Info', `${enabled ? 'Enabling' : 'Disabling'} mod: ${modName}`);
         window.ipcRenderer.updateModStatus(id, modName, enabled);
     }
 
@@ -84,7 +85,6 @@ const ModManager = () => {
     }
 
     function onToggle(event: React.ChangeEvent<HTMLInputElement>) {
-        console.log(event.target.checked);
         const payload = {
             toggleValue: event.target.checked,
             id: event.target.id,
@@ -199,7 +199,6 @@ const ModManager = () => {
     useEffect(() => {
         Object.keys(expandedMods).forEach((modName, id) => {
             const element = document.getElementById(`${modName}${id}`);
-            console.log(element);
             if (element) {
                 if (expandedMods[modName]) {
                     const childrenHeight = Array.from(element.children).reduce((totalHeight, child) => {
@@ -268,7 +267,7 @@ const ModManager = () => {
                     <div key={entry.id} className='mod-entry'>
                         <span style={{ marginLeft: "20px" }}>{entry.modName}</span>
                         <label className="switch" style={{ marginLeft: "auto", marginRight: "20px" }}>
-                            <input type="checkbox" checked={entry.enabled} onChange={(e) => handleModValueChange(entry.id, entry.modName, e.target.checked)}/>
+                            <input type="checkbox" checked={entry.enabled} onChange={(e) => handleModStatusChange(entry.id, entry.modName, e.target.checked)}/>
                             <span className="slider round"></span>
                         </label>
                     </div>

@@ -101,26 +101,23 @@
     transition: scale 0.25s ease-out, box-shadow 0.25s ease-out;
 }
 
-.mod-category h2 {
-    font-size: 18px;
-    margin: 10px 0;
-}
-
-
 .mod-entry {
     padding: 5px 0;
 }
 
 .mod-category {
+    position: relative;
+
     border: solid 2px #2e2e2e;
     margin-bottom: 10px;
     border-radius: 5px;
-    transition: border 0.25s ease-out, height 0.2s ease-out;
+    transition: border 0.25s ease-out, height 0.25s ease-out;
     overflow-y: hidden;
 }
 
-.mod-category {
-    position: relative;
+.mod-category h2 {
+    font-size: 18px;
+    margin: 10px 0;
 }
 
 .mod-dropdown-icon {
@@ -128,7 +125,7 @@
     height: 25px;
     position: absolute;
     right: 10px;
-    transform:translateY(2px);
+    transform: translateY(2px);
     transition: transform 0.25s ease-out;
 }
 
@@ -207,7 +204,7 @@
 select {
     background-color: #121212;
     border: 1px solid transparent;
-    
+
     padding: 8px;
     border-radius: 4px;
     font-size: 16px;

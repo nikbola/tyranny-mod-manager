@@ -297,7 +297,7 @@ ipcMain.handle('install-mod', async (_, file): Promise<{ modName: string } | nul
 });
 
 
-ipcMain.handle('update-mod-status', (_, id, modName, enabled) => {
+ipcMain.handle('update-mod-status', (_event, _id, modName, enabled) => {
   try {
     const modPath = enabled ? join(disabledModsDir, modName) : join(pluginsDir, modName);
     const targetPath = enabled ? join(pluginsDir, modName) : join(disabledModsDir, modName);
@@ -373,8 +373,11 @@ ipcMain.on('download-tmm-core', async () => {
 });
 
 ipcMain.handle('is-core-installed', (): Promise<boolean> => {
-  const coreModPath = path.join(pluginsDir, 'TMMCore', 'TMMCore.dll');
-  if (fs.existsSync(coreModPath)) {
+  const enabledCoreModPath = path.join(pluginsDir, 'TMMCore', 'TMMCore.dll');
+  const disabledCoreModPath = path.join(disabledModsDir, 'TMMCore', 'TMMCore.dll');
+  if (fs.existsSync(enabledCoreModPath)) {
+    return Promise.resolve(true);
+  } else if (fs.existsSync(disabledCoreModPath)) {
     return Promise.resolve(true);
   }
 

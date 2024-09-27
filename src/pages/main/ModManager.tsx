@@ -58,11 +58,6 @@ const ModManager = () => {
         { id: "awdoiajwd", label: "Test Text", modName: "TMMCore", actionType: 3 },
         { id: "awdoiajw", label: "Test Number", modName: "TMMCore", actionType: 4 },
         { id: "awdoiaj", label: "Test Radio", modName: "TMMCore", actionType: 5 },
-        { id: "awdoiajwdawdawd", label: "Test Text", modName: "TMMCore2", actionType: 3 },
-        { id: "awdoiajwffwa", label: "Test Number", modName: "TMMCore2", actionType: 4 },
-        { id: "awdoiajgreaergserawd", label: "Test Radio", modName: "TMMCore2", actionType: 1 },
-        { id: "awdoiajgreaergserawdd", label: "Test Radio", modName: "TMMCore2", actionType: 2 },
-        { id: "awdoiajgreaergserddwa", label: "Test Radio", modName: "TMMCore2", actionType: 3 }
     ]);
 
     function onSlider(event: React.ChangeEvent<HTMLInputElement>) {

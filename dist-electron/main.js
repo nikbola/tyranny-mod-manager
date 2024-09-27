@@ -2,7 +2,7 @@ import "electron";
 import "node:url";
 import "node:path";
 import "fs";
-import { M, R, V } from "./main-DAhRJmHz.js";
+import { M, R, V } from "./main-CLxK_dlQ.js";
 import "net";
 export {
   M as MAIN_DIST,

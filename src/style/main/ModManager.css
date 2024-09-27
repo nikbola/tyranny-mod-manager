@@ -84,6 +84,8 @@
     height: calc(100vh - 90px - var(--top-bar-height));
     top: calc(var(--top-bar-height) + 25px);
     background-color: var(--background-secondary);
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 .mod-settings-entry {
@@ -113,7 +115,25 @@
     border: solid 2px #2e2e2e;
     margin-bottom: 10px;
     border-radius: 5px;
-    transition: border 0.25s ease-out;
+    transition: border 0.25s ease-out, height 0.2s ease-out;
+    overflow-y: hidden;
+}
+
+.mod-category {
+    position: relative;
+}
+
+.mod-dropdown-icon {
+    width: 25px;
+    height: 25px;
+    position: absolute;
+    right: 10px;
+    transform:translateY(2px);
+    transition: transform 0.25s ease-out;
+}
+
+.mod-dropdown-icon.expanded {
+    transform: rotate(90deg);
 }
 
 .mod-category:hover {
@@ -192,7 +212,7 @@ select {
     border-radius: 4px;
     font-size: 16px;
     color: white;
-    /*appearance: none; /* Removes default arrow (doesn't work on all browsers) */
+    appearance: none;
     -webkit-appearance: none;
     cursor: pointer;
 
@@ -230,6 +250,7 @@ input {
 }
 
 input[type='range'] {
+    appearance: none;
     -webkit-appearance: none;
     height: 8px;
     background: #ddd;

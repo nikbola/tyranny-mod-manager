@@ -1,9 +1,8 @@
 import "electron";
 import "node:url";
 import "node:path";
-import { M, R, V } from "./main-tGI2O-zh.js";
-import "path";
 import "fs";
+import { M, R, V } from "./main-x0_42jqK.js";
 import "net";
 export {
   M as MAIN_DIST,

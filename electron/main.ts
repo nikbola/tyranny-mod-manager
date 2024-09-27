@@ -1,14 +1,13 @@
-import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
-import { fileURLToPath } from 'node:url'
-import path from 'node:path'
-import { checkAllLaunchers } from './modules/paths/pathChecks'
-import { join } from 'path'
+import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
+import { fileURLToPath } from 'node:url';
+import path, { join } from 'node:path';
 import fs from 'fs';
-import { createFileSync, ensureDir, moveSync } from 'fs-extra'
+import { createFileSync, ensureDir, moveSync } from 'fs-extra';
 import AdmZip from 'adm-zip';
 import net from 'net';
-import { downloadExtMod } from './setup/dependencyDownloadHandler'
-import { Logger } from './logs/Logger'
+import { checkAllLaunchers } from './modules/paths/pathChecks';
+import { downloadExtMod } from './setup/dependencyDownloadHandler';
+import { Logger } from './logs/Logger';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 

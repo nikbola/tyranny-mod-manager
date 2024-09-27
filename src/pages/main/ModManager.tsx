@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../style/main/ModManager.css'
+import dropdownArrow from '../../assets/caret-forward-outline.svg'
 
 interface Entry {
     id: number,
@@ -8,6 +9,8 @@ interface Entry {
 }
 
 const ModManager = () => {
+    const [expandedMods, setExpandedMods] = useState<Record<string, boolean>>({});
+
     useEffect(() => {
         const fetchMods = async () => {
             const modList: ModList | null = await window.ipcRenderer.getManagedMods();
@@ -34,7 +37,7 @@ const ModManager = () => {
         fetchMods();
     }, []);
 
-    const handleModValueChange = (id: number, modName: string, enabled: boolean) => {
+    /*const handleModValueChange = (id: number, modName: string, enabled: boolean) => {
 
         setEntry((mods) =>
             mods.map((mod) =>
@@ -43,7 +46,7 @@ const ModManager = () => {
         );
 
         window.ipcRenderer.updateModStatus(id, modName, enabled);
-    }
+    }*/
 
     const [dragging, setDragging] = useState(false);
     const [entries, setEntry] = useState<Entry[]>([
@@ -53,7 +56,12 @@ const ModManager = () => {
     const [settings, setSettings] = useState<ModActionPayload[]>([
         { id: "awdoiajwd", label: "Test Text", modName: "TMMCore", actionType: 3 },
         { id: "awdoiajw", label: "Test Number", modName: "TMMCore", actionType: 4 },
-        { id: "awdoiaj", label: "Test Radio", modName: "TMMCore", actionType: 5 }
+        { id: "awdoiaj", label: "Test Radio", modName: "TMMCore", actionType: 5 },
+        { id: "awdoiajwdawdawd", label: "Test Text", modName: "TMMCore2", actionType: 3 },
+        { id: "awdoiajwffwa", label: "Test Number", modName: "TMMCore2", actionType: 4 },
+        { id: "awdoiajgreaergserawd", label: "Test Radio", modName: "TMMCore2", actionType: 1 },
+        { id: "awdoiajgreaergserawdd", label: "Test Radio", modName: "TMMCore2", actionType: 2 },
+        { id: "awdoiajgreaergserddwa", label: "Test Radio", modName: "TMMCore2", actionType: 3 }
     ]);
 
     function onSlider(event: React.ChangeEvent<HTMLInputElement>) {
@@ -76,6 +84,7 @@ const ModManager = () => {
     }
 
     function onToggle(event: React.ChangeEvent<HTMLInputElement>) {
+        console.log(event.target.checked);
         const payload = {
             toggleValue: event.target.checked,
             id: event.target.id,
@@ -117,14 +126,14 @@ const ModManager = () => {
         setNumber(prevNumber => prevNumber + 1);
     }
 
-    const wrapperRef = useRef<HTMLDivElement>(null);
+    /*const wrapperRef = useRef<HTMLDivElement>(null);
     const fieldsetRef = useRef<HTMLFieldSetElement>(null);
     useEffect(() => {
         if (wrapperRef.current && fieldsetRef.current) {
             const fieldsetHeight = fieldsetRef.current.offsetHeight;
             wrapperRef.current.style.height = `${fieldsetHeight}px`;
         }
-    }, []);
+    }, [expandedMods]);*/
 
     const renderActionType = (actionType: number, label: string, action: ModActionPayload) => {
         switch (actionType) {
@@ -146,7 +155,12 @@ const ModManager = () => {
                 return (
                     <div className='mod-setting-wrapper'>
                         <label>{label}</label>
-                        <input id={action.id} onChange={onToggle} className='setting-toggle' type="checkbox" />
+                        <div className="toggle-switch" style={{width: "60px"}}>
+                            <label className="switch">
+                                <input type="checkbox" id={action.id} onChange={onToggle} />
+                                <span className="slider round"></span>
+                            </label>
+                        </div>
                     </div>
                 );
             case 3:
@@ -184,14 +198,29 @@ const ModManager = () => {
         }
     };
 
-    const [expandedMods, setExpandedMods] = useState<Record<string, boolean>>({});
-
     const toggleExpand = (modName: string) => {
         setExpandedMods((prev) => ({
             ...prev,
             [modName]: !prev[modName],
         }));
     };
+
+    useEffect(() => {
+        Object.keys(expandedMods).forEach((modName, id) => {
+            const element = document.getElementById(`${modName}${id}`);
+            console.log(element);
+            if (element) {
+                if (expandedMods[modName]) {
+                    const childrenHeight = Array.from(element.children).reduce((totalHeight, child) => {
+                        return totalHeight + (child as HTMLElement).offsetHeight;
+                    }, 0);
+                    element.style.height = `${childrenHeight + 30}px`;
+                } else {
+                    element.style.height = '48px';
+                }
+            }
+        });
+    }, [expandedMods]);
 
     const groupedSettings = settings.reduce((acc, setting) => {
         if (!acc[setting.modName]) {
@@ -262,11 +291,15 @@ const ModManager = () => {
             >
                 <h3 className='mod-settings-header'>Mod Settings</h3>
                 {Object.keys(groupedSettings).length > 0 ? (
-                    Object.keys(groupedSettings).map((modName) => (
+                    Object.keys(groupedSettings).map((modName, id) => (
                         groupedSettings[modName] && groupedSettings[modName].length > 0 ? (
-                            <div key={modName} className="mod-category">
+                            <div id={`${modName}${id}`} key={modName} className="mod-category">
                                 <h2 onClick={() => toggleExpand(modName)} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                                    {modName} {expandedMods[modName] ? '-' : '+'}
+                                    {modName}
+                                    <img
+                                        className={`mod-dropdown-icon ${expandedMods[modName] ? 'expanded' : ''}`}
+                                        src={dropdownArrow}
+                                    />
                                 </h2>
 
                                 {expandedMods[modName] && (
@@ -279,7 +312,7 @@ const ModManager = () => {
                                     </div>
                                 )}
                             </div>
-                        ) : null // Optionally, handle empty modName if needed
+                        ) : null
                     ))
                 ) : (
                     <div className="no-settings-message">

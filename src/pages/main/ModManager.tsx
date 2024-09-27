@@ -37,7 +37,7 @@ const ModManager = () => {
         fetchMods();
     }, []);
 
-    /*const handleModValueChange = (id: number, modName: string, enabled: boolean) => {
+    const handleModValueChange = (id: number, modName: string, enabled: boolean) => {
 
         setEntry((mods) =>
             mods.map((mod) =>
@@ -46,7 +46,7 @@ const ModManager = () => {
         );
 
         window.ipcRenderer.updateModStatus(id, modName, enabled);
-    }*/
+    }
 
     const [dragging, setDragging] = useState(false);
     const [entries, setEntry] = useState<Entry[]>([
@@ -125,15 +125,6 @@ const ModManager = () => {
     function onIncrement() {
         setNumber(prevNumber => prevNumber + 1);
     }
-
-    /*const wrapperRef = useRef<HTMLDivElement>(null);
-    const fieldsetRef = useRef<HTMLFieldSetElement>(null);
-    useEffect(() => {
-        if (wrapperRef.current && fieldsetRef.current) {
-            const fieldsetHeight = fieldsetRef.current.offsetHeight;
-            wrapperRef.current.style.height = `${fieldsetHeight}px`;
-        }
-    }, [expandedMods]);*/
 
     const renderActionType = (actionType: number, label: string, action: ModActionPayload) => {
         switch (actionType) {
@@ -277,7 +268,7 @@ const ModManager = () => {
                     <div key={entry.id} className='mod-entry'>
                         <span style={{ marginLeft: "20px" }}>{entry.modName}</span>
                         <label className="switch" style={{ marginLeft: "auto", marginRight: "20px" }}>
-                            <input type="checkbox" />
+                            <input type="checkbox" checked={entry.enabled} onChange={(e) => handleModValueChange(entry.id, entry.modName, e.target.checked)}/>
                             <span className="slider round"></span>
                         </label>
                     </div>

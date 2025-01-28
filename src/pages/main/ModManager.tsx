@@ -3,6 +3,7 @@ import '../../style/main/ModManager.css';
 import dropdownArrow from '../../assets/caret-forward-outline.svg';
 import ContextBar from '../static/ContextBar';
 import { usePopup } from '../static/PopupContext';
+import DropdownWithArrow from '../elements/DropdownWithArrow';
 
 interface Entry {
     id: number,
@@ -63,9 +64,12 @@ const ModManager = () => {
     ]);
 
     const [settings, setSettings] = useState<ModActionPayload[]>([
-        { id: "awdoiajwd", label: "Test Text", modName: "TMMCore", actionType: 3 },
-        { id: "awdoiajw", label: "Test Number", modName: "TMMCore", actionType: 4 },
-        { id: "awdoiaj", label: "Test Radio", modName: "TMMCore", actionType: 5 },
+        { id: "block-telemetry", label: "Block Telemetry", modName: "Bag of Tricks", actionType: 2 },
+        { id: "enable-godmode", label: "Enable Godmode", modName: "Bag of Tricks", actionType: 2 },
+        { id: "enable-invisibility", label: "Enable Invisibility", modName: "Bag of Tricks", actionType: 2 },
+        { id: "kill-all-enemies", label: "Kill All Enemies", modName: "Bag of Tricks", actionType: 1 },
+        { id: "clear-fog", label: "Clear Fog", modName: "Bag of Tricks", actionType: 1 },
+        { id: "add-currency", label: "Add Currency", modName: "Bag of Tricks", actionType: 4 },
     ]);
 
     function onSlider(event: React.ChangeEvent<HTMLInputElement>) {
@@ -119,6 +123,30 @@ const ModManager = () => {
         window.ipcRenderer.send('setting-changed', jsonPayload);
     }
 
+    function onDropdown(event: React.ChangeEvent<HTMLSelectElement>) {
+        console.log(event.target.selectedIndex);
+        const index = event.target.selectedIndex;
+        const value = event.target.value;
+        const payload = {
+            dropdownIntValue: index,
+            dropdownStringValue: value,
+            id: event.target.id,
+            type: 5
+        }
+        const jsonPayload = JSON.stringify(payload);
+        window.ipcRenderer.send('setting-changed', jsonPayload);
+    }
+
+    function onColor(event: React.ChangeEvent<HTMLInputElement>) {
+        const payload = {
+            colorValue: event.target.value,
+            id: event.target.id,
+            type: 6
+        }
+        const jsonPayload = JSON.stringify(payload);
+        window.ipcRenderer.send('setting-changed', jsonPayload);
+    }
+
     const [number, setNumber] = useState<number>(0);
 
     function onDecrement() {
@@ -142,7 +170,7 @@ const ModManager = () => {
                 return (
                     <div className='mod-setting-wrapper'>
                         <label>{label}</label>
-                        <button id={action.id} onClick={onButton}>{label}</button>
+                        <button className="mod-setting-button" id={action.id} onClick={onButton}>{label}</button>
                     </div>
                 );
             case 2:
@@ -169,24 +197,33 @@ const ModManager = () => {
                     <div className='mod-setting-wrapper'>
                         <label>{label}</label>
                         <div className='number-input-container'>
-                            <button onClick={onDecrement}>-</button>
+                            <button className='setting-number-button' onClick={onDecrement}>-</button>
                             <input id={action.id} min='1' max='10' onChange={onNumber} className='setting-number' type="number" value={number} />
-                            <button onClick={onIncrement}>+</button>
+                            <button className='setting-number-button' onClick={onIncrement}>+</button>
                         </div>
                     </div>
                 )
             case 5:
+                return <DropdownWithArrow
+                    label={label}
+                    name="test"
+                    options={[
+                        { value: "ooga", label: "Ooga" },
+                        { value: "booga", label: "Booga" },
+                        { value: "dooga", label: "Dooga" },
+                        { value: "yooga", label: "Yooga" },
+                    ]}
+                    onDropdown={onDropdown}
+                    dropdownArrow={dropdownArrow}
+                />
+            case 6:
                 return (
                     <div className='mod-setting-wrapper'>
                         <label>{label}</label>
-                        <select className='setting-dropdown' name="test">
-                            <option value="ooga">Ooga</option>
-                            <option value="booga">Booga</option>
-                            <option value="dooga">Dooga</option>
-                            <option value="yooga">Yooga</option>
-                        </select>
+                        <input className='setting-color' type="color" onChange={onColor} />
                     </div>
                 )
+                return;
             default:
                 return null;
         }
@@ -299,6 +336,9 @@ const ModManager = () => {
 
                                 {expandedMods[modName] && (
                                     <div className="mod-entries">
+                                        {/*<div className='mod-entry-category'>
+                                            Test Category
+                                        </div>*/}
                                         {groupedSettings[modName].map((setting) => (
                                             <div key={setting.id} className="mod-setting">
                                                 {renderActionType(setting.actionType, setting.label, setting)}
@@ -318,14 +358,16 @@ const ModManager = () => {
 
             </div>
             {selectedEntries.length > 0 && <ContextBar button={[
-                { text: 'Open Mods Folder', onClick: () => { 
-                    console.log("Opening mods folder");
-                    window.ipcRenderer.send('open-mods-folder');
-                }},
+                {
+                    text: 'Open Mods Folder', onClick: () => {
+                        console.log("Opening mods folder");
+                        window.ipcRenderer.send('open-mods-folder');
+                    }
+                },
                 {
                     text: 'Uninstall', color: 'var(--main-red)', onClick: async () => {
                         window.ipcRenderer.send('log', 'Info', `Uninstalling mod: ${selectedEntries[0]}`);
-                        const entryList: ModInfo[] = []; 
+                        const entryList: ModInfo[] = [];
                         entries.forEach((entry) => {
                             if (selectedEntries.includes(entry.modName)) {
                                 entryList.push({ name: entry.modName, enabled: entry.enabled } as ModInfo);

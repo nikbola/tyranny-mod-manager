@@ -43,5 +43,8 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   },
   isBepInExInstalled: () => {
     return electron.ipcRenderer.invoke("is-bep-in-ex-installed");
+  },
+  uninstallMod: (modInfo) => {
+    return electron.ipcRenderer.invoke("uninstall-mod", modInfo);
   }
 });

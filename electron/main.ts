@@ -413,6 +413,7 @@ ipcMain.on('launch-tyranny', () => {
 ipcMain.on('download-ext-mod', async (_, url, modName: string) => {
   if (win)
     await downloadExtMod(path.join(pluginsDir, modName + '.zip'), pluginsDir, url, win);
+  
 });
 
 ipcMain.on('log', (_, type, message) => {
@@ -432,4 +433,28 @@ ipcMain.on('log', (_, type, message) => {
     default:
       break;
   }
+});
+
+ipcMain.on('open-mods-folder', () => {
+  shell.openPath(pluginsDir);
+});
+
+ipcMain.handle('uninstall-mod', (_, modInfo: ModInfo[]): Promise<{status: boolean, modName: string, reason?: string}[]> => {
+  const results: {status: boolean, modName: string, reason?: string}[] = [];
+  console.log(modInfo);
+  modInfo.forEach(mod => { 
+    try {
+      const modPath = join(mod.enabled ? pluginsDir : disabledModsDir, mod.name);
+      if (fs.existsSync(modPath)) {
+        fs.rmdirSync(modPath, { recursive: true });
+        results.push({ status: true, modName: mod.name });
+      } else {
+        results.push({ status: false, modName: mod.name, reason: 'Mod path does not exist' });
+      }
+    } catch (error) {
+      results.push({ status: false, modName: mod.name, reason: (error as Error).message });
+    }
+  });
+
+  return Promise.resolve(results);
 });

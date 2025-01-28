@@ -58,13 +58,19 @@
     justify-content: flex-start;
     align-items: center;
     color: white;
+    padding: 5px 0;
 
-    transition: scale 0.25s ease-out, box-shadow 0.25s ease-out;
+    transition: scale 0.25s ease-out, box-shadow 0.25s ease-out, background-color 0.25s ease-out;
 }
 
 .mod-entry:hover {
+    cursor: pointer;
     scale: 1.01;
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.25);
+}
+
+.mod-entry.selected {
+    background-color: var(--background-primary);
 }
 
 .mod-checkbox {
@@ -101,8 +107,22 @@
     transition: scale 0.25s ease-out, box-shadow 0.25s ease-out;
 }
 
-.mod-entry {
-    padding: 5px 0;
+.mod-entry-category {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: var(--background-primary);
+    margin-left: 10px;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.mod-setting-button {
+    transition: scale 0.25s ease-out, outline 0.25s ease-out;
+}
+
+.mod-setting-button:hover {
+    scale: 1.05;
+    outline: solid 1px rgb(75, 75, 75);
 }
 
 .mod-category {
@@ -134,7 +154,7 @@
 }
 
 .mod-category:hover {
-    border: solid 2px var(--main-primary);
+    border: solid 2px rgb(75, 75, 75);
 }
 
 .mod-setting {
@@ -144,7 +164,6 @@
     align-items: center;
     padding-left: 20px;
     padding-right: 20px;
-    transition: background-color 0.25s ease-out;
 }
 
 .mod-setting:last-child {
@@ -166,11 +185,14 @@
 .mod-setting div label {
     width: 200px;
     text-align: left;
-    font-weight: bold;
 }
 
 .setting-slider {
     width: 500px;
+}
+
+input[type="color"] {
+    background-color: transparent;
 }
 
 .setting-toggle {
@@ -196,9 +218,37 @@
     margin-right: 20px;
 }
 
+.setting-number-button {
+    width: 50px;
+    transition: scale 0.25s ease-out, outline 0.25s ease-out;
+}
+
+.setting-number-button:hover {
+    scale: 1.1;
+    outline: solid 1px rgb(75, 75, 75);
+}
+
+.setting-dropdown-wrapper {
+    position: relative;
+    display: contents;
+}
+
 .setting-dropdown {
     width: 600px;
     height: 44px;
+    padding-right: 40px;
+}
+
+.setting-dropdown-arrow {
+    position: absolute;
+    right: 30px;
+    height: 24px;
+
+    transition: transform 0.25s ease-out;
+}
+
+.setting-dropdown-arrow.rotated {
+    transform: rotate(90deg);
 }
 
 select {

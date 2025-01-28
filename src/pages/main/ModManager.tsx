@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import '../../style/main/ModManager.css'
-import dropdownArrow from '../../assets/caret-forward-outline.svg'
+import '../../style/main/ModManager.css';
+import dropdownArrow from '../../assets/caret-forward-outline.svg';
+import ContextBar from '../static/ContextBar';
+import { usePopup } from '../static/PopupContext';
+import DropdownWithArrow from '../elements/DropdownWithArrow';
 
 interface Entry {
     id: number,
@@ -9,7 +12,9 @@ interface Entry {
 }
 
 const ModManager = () => {
+    const { addPopup } = usePopup();
     const [expandedMods, setExpandedMods] = useState<Record<string, boolean>>({});
+    const [selectedEntries, setSelectedEntries] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchMods = async () => {
@@ -37,6 +42,10 @@ const ModManager = () => {
         fetchMods();
     }, []);
 
+    function selectModEntry(modName: string) {
+        setSelectedEntries([modName]);
+    }
+
     const handleModStatusChange = (id: number, modName: string, enabled: boolean) => {
 
         setEntry((mods) =>
@@ -51,13 +60,16 @@ const ModManager = () => {
 
     const [dragging, setDragging] = useState(false);
     const [entries, setEntry] = useState<Entry[]>([
-        //{ id: 0, modName: "Debug Mod", enabled: true }
+        { id: 0, modName: "Debug Mod", enabled: true }
     ]);
 
     const [settings, setSettings] = useState<ModActionPayload[]>([
-        { id: "awdoiajwd", label: "Test Text", modName: "TMMCore", actionType: 3 },
-        { id: "awdoiajw", label: "Test Number", modName: "TMMCore", actionType: 4 },
-        { id: "awdoiaj", label: "Test Radio", modName: "TMMCore", actionType: 5 },
+        { id: "block-telemetry", label: "Block Telemetry", modName: "Bag of Tricks", actionType: 2 },
+        { id: "enable-godmode", label: "Enable Godmode", modName: "Bag of Tricks", actionType: 2 },
+        { id: "enable-invisibility", label: "Enable Invisibility", modName: "Bag of Tricks", actionType: 2 },
+        { id: "kill-all-enemies", label: "Kill All Enemies", modName: "Bag of Tricks", actionType: 1 },
+        { id: "clear-fog", label: "Clear Fog", modName: "Bag of Tricks", actionType: 1 },
+        { id: "add-currency", label: "Add Currency", modName: "Bag of Tricks", actionType: 4 },
     ]);
 
     function onSlider(event: React.ChangeEvent<HTMLInputElement>) {
@@ -111,6 +123,30 @@ const ModManager = () => {
         window.ipcRenderer.send('setting-changed', jsonPayload);
     }
 
+    function onDropdown(event: React.ChangeEvent<HTMLSelectElement>) {
+        console.log(event.target.selectedIndex);
+        const index = event.target.selectedIndex;
+        const value = event.target.value;
+        const payload = {
+            dropdownIntValue: index,
+            dropdownStringValue: value,
+            id: event.target.id,
+            type: 5
+        }
+        const jsonPayload = JSON.stringify(payload);
+        window.ipcRenderer.send('setting-changed', jsonPayload);
+    }
+
+    function onColor(event: React.ChangeEvent<HTMLInputElement>) {
+        const payload = {
+            colorValue: event.target.value,
+            id: event.target.id,
+            type: 6
+        }
+        const jsonPayload = JSON.stringify(payload);
+        window.ipcRenderer.send('setting-changed', jsonPayload);
+    }
+
     const [number, setNumber] = useState<number>(0);
 
     function onDecrement() {
@@ -134,14 +170,14 @@ const ModManager = () => {
                 return (
                     <div className='mod-setting-wrapper'>
                         <label>{label}</label>
-                        <button id={action.id} onClick={onButton}>{label}</button>
+                        <button className="mod-setting-button" id={action.id} onClick={onButton}>{label}</button>
                     </div>
                 );
             case 2:
                 return (
                     <div className='mod-setting-wrapper'>
                         <label>{label}</label>
-                        <div className="toggle-switch" style={{width: "60px"}}>
+                        <div className="toggle-switch" style={{ width: "60px" }}>
                             <label className="switch">
                                 <input type="checkbox" id={action.id} onChange={onToggle} />
                                 <span className="slider round"></span>
@@ -161,24 +197,33 @@ const ModManager = () => {
                     <div className='mod-setting-wrapper'>
                         <label>{label}</label>
                         <div className='number-input-container'>
-                            <button onClick={onDecrement}>-</button>
+                            <button className='setting-number-button' onClick={onDecrement}>-</button>
                             <input id={action.id} min='1' max='10' onChange={onNumber} className='setting-number' type="number" value={number} />
-                            <button onClick={onIncrement}>+</button>
+                            <button className='setting-number-button' onClick={onIncrement}>+</button>
                         </div>
                     </div>
                 )
             case 5:
+                return <DropdownWithArrow
+                    label={label}
+                    name="test"
+                    options={[
+                        { value: "ooga", label: "Ooga" },
+                        { value: "booga", label: "Booga" },
+                        { value: "dooga", label: "Dooga" },
+                        { value: "yooga", label: "Yooga" },
+                    ]}
+                    onDropdown={onDropdown}
+                    dropdownArrow={dropdownArrow}
+                />
+            case 6:
                 return (
                     <div className='mod-setting-wrapper'>
                         <label>{label}</label>
-                        <select className='setting-dropdown' name="test">
-                            <option value="ooga">Ooga</option>
-                            <option value="booga">Booga</option>
-                            <option value="dooga">Dooga</option>
-                            <option value="yooga">Yooga</option>
-                        </select>
+                        <input className='setting-color' type="color" onChange={onColor} />
                     </div>
                 )
+                return;
             default:
                 return null;
         }
@@ -259,21 +304,23 @@ const ModManager = () => {
                 <h3 className='mod-list-header'>Mod List</h3>
 
                 {entries.map((entry) => (
-                    <div key={entry.id} className='mod-entry'>
+                    <div key={entry.id} className={`mod-entry ${selectedEntries.includes(entry.modName) ? 'selected' : ''}`} onClick={(e) => {
+                        if (!(e.target as HTMLElement).closest('.switch')) {
+                            selectModEntry(entry.modName);
+                        }
+                    }}>
                         <span style={{ marginLeft: "20px" }}>{entry.modName}</span>
                         <label className="switch" style={{ marginLeft: "auto", marginRight: "20px" }}>
-                            <input type="checkbox" checked={entry.enabled} onChange={(e) => handleModStatusChange(entry.id, entry.modName, e.target.checked)}/>
+                            <input type="checkbox" checked={entry.enabled} onChange={(e) => handleModStatusChange(entry.id, entry.modName, e.target.checked)} />
                             <span className="slider round"></span>
                         </label>
                     </div>
                 ))}
-
             </div>
             <div className='mod-settings-list'
                 style={{
                     border: dragging ? '2px dashed var(--main-secondary)' : '2px solid var(--main-primary)',
-                }}
-            >
+                }}>
                 <h3 className='mod-settings-header'>Mod Settings</h3>
                 {Object.keys(groupedSettings).length > 0 ? (
                     Object.keys(groupedSettings).map((modName, id) => (
@@ -289,6 +336,9 @@ const ModManager = () => {
 
                                 {expandedMods[modName] && (
                                     <div className="mod-entries">
+                                        {/*<div className='mod-entry-category'>
+                                            Test Category
+                                        </div>*/}
                                         {groupedSettings[modName].map((setting) => (
                                             <div key={setting.id} className="mod-setting">
                                                 {renderActionType(setting.actionType, setting.label, setting)}
@@ -307,6 +357,40 @@ const ModManager = () => {
                 )}
 
             </div>
+            {selectedEntries.length > 0 && <ContextBar button={[
+                {
+                    text: 'Open Mods Folder', onClick: () => {
+                        console.log("Opening mods folder");
+                        window.ipcRenderer.send('open-mods-folder');
+                    }
+                },
+                {
+                    text: 'Uninstall', color: 'var(--main-red)', onClick: async () => {
+                        window.ipcRenderer.send('log', 'Info', `Uninstalling mod: ${selectedEntries[0]}`);
+                        const entryList: ModInfo[] = [];
+                        entries.forEach((entry) => {
+                            if (selectedEntries.includes(entry.modName)) {
+                                entryList.push({ name: entry.modName, enabled: entry.enabled } as ModInfo);
+                            }
+                        });
+
+                        console.log(entryList);
+                        const results = await window.ipcRenderer.uninstallMod(entryList);
+
+                        results.forEach((result) => {
+                            if (result.status) {
+                                window.ipcRenderer.send('log', 'Success', `Uninstalled mod: ${result.modName}`);
+                                addPopup('success', `Uninstalled mod: ${result.modName}`);
+                            } else {
+                                window.ipcRenderer.send('log', 'Error', `Failed to uninstall mod: ${result.modName}`);
+                                addPopup('error', `Failed to uninstall mod: ${result.modName}. Reason: ${result.reason}`);
+                            }
+                        });
+                        setEntry((mods) => mods.filter((mod) => !selectedEntries.includes(mod.modName)));
+                        setSelectedEntries([]);
+                    }
+                }
+            ]} label={`Manage ${selectedEntries.length > 1 ? 'selected mods' : selectedEntries[0]}`}></ContextBar>}
         </>
     );
 };

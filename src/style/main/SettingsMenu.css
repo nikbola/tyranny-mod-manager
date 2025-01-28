@@ -40,7 +40,7 @@
 }
 
 svg.settings-close-btn {
-    fill: rgb(196, 100, 100);
+    fill: var(--main-red);
 }
 
 .settings-sidebar {

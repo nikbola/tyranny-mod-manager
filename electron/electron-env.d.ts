@@ -32,6 +32,7 @@ interface Window {
     isCoreInstalled: () => Promise<bool>;
     isBepInExInstalled: () => Promise<bool>;
     updateModStatus: (id: number, modName: string, enabled: boolean) => void;
+    uninstallMod: (modInfo: ModInfo[]) => Promise<{status: boolean, modName: string, reason?: string}[]>;
     installMod: (path: string) => Promise<{ id: number, modName: string } | null>;
     on: (...args: Parameters<import('electron').IpcRenderer['on']>) => void;
     off: (...args: Parameters<import('electron').IpcRenderer['off']>) => void;

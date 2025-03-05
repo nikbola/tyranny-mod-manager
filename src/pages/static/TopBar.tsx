@@ -6,16 +6,22 @@ import ModDownloads from "../main/ModDownloads";
 import SettingsMenu from "../main/SettingsMenu";
 import LogsMenu from "../main/Logs";
 import { useLogs } from "../main/LogContext";
+import NexusDownloads from "../main/NexusDownloads";
 
 function TopBar() {
     const { logs } = useLogs();
 
+    const [showNexusMods, setShowNexusMods] = useState<boolean>(false);
     const [showDownloads, setShowDownloads] = useState<boolean>(false);
     const [showLogs, setShowLogs] = useState<boolean>(false);
     const [showSettings, setShowSettings] = useState<boolean>(false);
 
     function launchTyranny() {
         window.ipcRenderer.send('launch-tyranny');
+    }
+
+    function toggleNexusMods() {
+        setShowNexusMods((prev) => !prev);
     }
 
     function toggleDownloads() {
@@ -46,6 +52,7 @@ function TopBar() {
         <>
             <div className="top-bar">
                 <img className="logo" src={banner} alt="" />
+                <button className="category-button" onClick={toggleNexusMods}>Nexus</button> 
                 <button className="category-button" onClick={toggleDownloads}>Downloads</button>
                 <button className="category-button" onClick={toggleLogs}>Logs</button>
                 <button className="category-button" onClick={toggleSettings}>Settings</button>
@@ -54,6 +61,7 @@ function TopBar() {
                 </div>
             </div>
 
+            {showNexusMods && <NexusDownloads />}
             {showDownloads && <ModDownloads onClose={closeDownloads} />}
             {showLogs && <LogsMenu logs={logs} onClose={closeLogs} />}
             {showSettings && <SettingsMenu onClose={closeSettings} />}

@@ -70,6 +70,7 @@ const ModManager = () => {
         { id: "kill-all-enemies", label: "Kill All Enemies", modName: "Bag of Tricks", actionType: 1 },
         { id: "clear-fog", label: "Clear Fog", modName: "Bag of Tricks", actionType: 1 },
         { id: "add-currency", label: "Add Currency", modName: "Bag of Tricks", actionType: 4 },
+        { id: "test-color", label: "Test Color", modName: "Bag of Tricks", actionType: 6 },
     ]);
 
     function onSlider(event: React.ChangeEvent<HTMLInputElement>) {
@@ -89,6 +90,7 @@ const ModManager = () => {
         };
         const jsonPayload = JSON.stringify(payload);
         window.ipcRenderer.send('setting-changed', jsonPayload);
+        window.ipcRenderer.send('fetch-mod-list');
     }
 
     function onToggle(event: React.ChangeEvent<HTMLInputElement>) {

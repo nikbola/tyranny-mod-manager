@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, shell, session } from 'electron';
 import { fileURLToPath } from 'node:url';
 import path, { join } from 'node:path';
 import fs from 'fs';
@@ -8,9 +8,9 @@ import net from 'net';
 import { checkAllLaunchers } from './modules/paths/pathChecks';
 import { downloadExtMod } from './setup/dependencyDownloadHandler';
 import { Logger } from './logs/Logger';
+import { fetchModsOnNexus } from './modules/nexus-mods/modFetcher';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
 const appDataDir = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share");
 const dataDir = join(appDataDir, 'Tyranny Mod Manager');
 const persistentDataDir = join(dataDir, 'persistent-data');
@@ -18,6 +18,8 @@ const logsDir = join(dataDir, 'logs');
 const disabledModsDir = join(dataDir, 'mods');
 const cachedPathsFile = join(persistentDataDir, 'paths.json');
 const installedModsFile = join(persistentDataDir, 'modList.json');
+export const nexusModsCacheTimeFile = join(persistentDataDir, 'nexusModsCacheTime.timestamp');
+export const nexusModsCachedModsFile = join(persistentDataDir, 'nexusCachedMods.json');
 
 const currentDate = new Date();
 const formattedDate = `${String(currentDate.getDate()).padStart(2, '0')}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${currentDate.getFullYear()} (${String(currentDate.getHours()).padStart(2, '0')};${String(currentDate.getMinutes()).padStart(2, '0')})`;
@@ -31,7 +33,7 @@ ensureDir(persistentDataDir);
 ensureDir(disabledModsDir);
 ensureDir(logsDir);
 
-let logger: Logger;
+export let logger: Logger;
 
 process.env.APP_ROOT = path.join(__dirname, '..')
 
@@ -129,6 +131,69 @@ function createWindow() {
   }
 }
 
+function openNexusDownloadPage(url: string) {
+  const nexusWindow = new BrowserWindow({
+    width: 1000,
+    height: 800,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true
+    }
+  });
+
+  nexusWindow.loadURL(url);
+
+  const ses = session.defaultSession;
+
+  const onWillDownload = (_: Electron.Event, item: Electron.DownloadItem, webContents: Electron.WebContents) => {
+    if (webContents !== nexusWindow.webContents) return;
+
+    const fileName = item.getFilename();
+    const desiredPath = path.join(persistentDataDir, fileName);
+
+    item.setSavePath(desiredPath);
+
+    item.on('done', (_, state) => {
+      if (state === 'completed') {
+        console.log('Download completed: ' + desiredPath);
+      } else {
+        console.log(`Download failed: ${state}`);
+      }
+      nexusWindow.close();
+    });
+  };
+
+  ses.on('will-download', onWillDownload);
+
+  nexusWindow.webContents.on('did-finish-load', async () => {
+    await nexusWindow.webContents.executeJavaScript(`
+      (function() {
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        function tryClick() {
+          const btn = document.getElementById('startDownloadButton');
+          if (btn) {
+            console.log("Button found. Clicking now...");
+            btn.click();
+          } else if (attempts < maxAttempts) {
+            attempts++;
+            setTimeout(tryClick, 1000);
+          } else {
+            console.log("Button not found after", maxAttempts, "attempts.");
+          }
+        }
+        tryClick();
+      })();
+    `);
+  });
+
+  nexusWindow.on('closed', () => {
+    ses.removeListener('will-download', onWillDownload);
+  });
+}
+
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
@@ -142,7 +207,7 @@ app.on('activate', () => {
   }
 })
 
-app.whenReady().then(createWindow)
+app.whenReady().then(createWindow);
 
 ipcMain.handle('open-exe-dialog', async (): Promise<string | null> => {
   try {
@@ -302,27 +367,27 @@ ipcMain.handle('update-mod-status', (_event, _id, modName, enabled) => {
     const modPath = enabled ? join(disabledModsDir, modName) : join(pluginsDir, modName);
     const targetPath = enabled ? join(pluginsDir, modName) : join(disabledModsDir, modName);
     moveSync(modPath, targetPath);
-  
+
     const installedMods = fs.readFileSync(installedModsFile, 'utf-8');
-  
+
     let modInfo;
     if (installedMods)
       modInfo = JSON.parse(installedMods) as ModList;
-  
+
     if (!modInfo)
       modInfo = { mods: [] };
-  
+
     const index = modInfo.mods.findIndex(mod => mod.name == modName);
     modInfo.mods[index] = { name: modName, enabled: enabled };
-  
+
     const modListJson = JSON.stringify(modInfo, null, 2);
     fs.writeFileSync(installedModsFile, modListJson);
     logger.success(`Successfully ${enabled ? 'enabled' : 'disabled'} mod: ${modName}`);
-    win?.webContents.send('add-popup', 'success', `Successfully ${enabled ? 'enabled' : 'disabled'} mod: ${modName}`);  
+    win?.webContents.send('add-popup', 'success', `Successfully ${enabled ? 'enabled' : 'disabled'} mod: ${modName}`);
   } catch (error) {
     console.error('Error updating mod status:', error);
     logger.error('Error updating mod status:', error as Error);
-    win?.webContents.send('add-popup', 'error', `Something went wrong while updating mod status: ${modName}. See logs for more info`);  
+    win?.webContents.send('add-popup', 'error', `Something went wrong while updating mod status: ${modName}. See logs for more info`);
   }
 })
 
@@ -413,7 +478,7 @@ ipcMain.on('launch-tyranny', () => {
 ipcMain.on('download-ext-mod', async (_, url, modName: string) => {
   if (win)
     await downloadExtMod(path.join(pluginsDir, modName + '.zip'), pluginsDir, url, win);
-  
+
 });
 
 ipcMain.on('log', (_, type, message) => {
@@ -439,10 +504,10 @@ ipcMain.on('open-mods-folder', () => {
   shell.openPath(pluginsDir);
 });
 
-ipcMain.handle('uninstall-mod', (_, modInfo: ModInfo[]): Promise<{status: boolean, modName: string, reason?: string}[]> => {
-  const results: {status: boolean, modName: string, reason?: string}[] = [];
+ipcMain.handle('uninstall-mod', (_, modInfo: ModInfo[]): Promise<{ status: boolean, modName: string, reason?: string }[]> => {
+  const results: { status: boolean, modName: string, reason?: string }[] = [];
   console.log(modInfo);
-  modInfo.forEach(mod => { 
+  modInfo.forEach(mod => {
     try {
       const modPath = join(mod.enabled ? pluginsDir : disabledModsDir, mod.name);
       if (fs.existsSync(modPath)) {
@@ -457,4 +522,24 @@ ipcMain.handle('uninstall-mod', (_, modInfo: ModInfo[]): Promise<{status: boolea
   });
 
   return Promise.resolve(results);
+});
+
+ipcMain.on('fetch-mod-list', async () => {
+  const mods = await fetchModsOnNexus();
+  if (mods) {
+    win?.webContents.send('mod-list-fetched', mods);
+  } else {
+    win?.webContents.send('mod-list-fetch-failed');
+  }
+});
+
+ipcMain.on('open-url', async (_, url: string) => {
+  console.log(url);
+  shell.openExternal(url);
+})
+
+ipcMain.on('download-nexus-mod', async (_, mod: NexusModInfo, fileID: number) => {
+  //https://www.nexusmods.com/tyranny/mods/38?tab=files&file_id=506
+  var url = `https://www.nexusmods.com/tyranny/mods/${mod.mod_id}?tab=files&file_id=${fileID}`
+  openNexusDownloadPage(url);
 });
